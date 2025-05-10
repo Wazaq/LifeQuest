@@ -1,0 +1,232 @@
+extends Node
+## UIManager: Handles UI transitions and common interface elements
+
+# Reference to main UI container
+var main_container: Control = null
+
+# Current active UI panel/screen
+var current_screen: Control = null
+
+# UI transition animations
+var transition_in_time: float = 0.3
+var transition_out_time: float = 0.2
+var default_transition_type: int = Tween.TRANS_SINE
+
+# Toast notification settings
+var toast_duration: float = 3.0
+var toast_container: Control = null
+var active_toasts: Array[Control] = []
+
+# UI sounds
+var sound_button_click: AudioStream = null
+var sound_popup_show: AudioStream = null
+var sound_notification: AudioStream = null
+var sound_success: AudioStream = null
+var sound_failure: AudioStream = null
+
+# Signals
+signal screen_changed(old_screen, new_screen)
+signal toast_displayed(message)
+signal ui_initialized
+
+func _ready():
+	print("UIManager: Initializing UI system...")
+	# Wait for the tree to be ready before attempting to find UI elements
+	call_deferred("initialize_ui")
+
+# Initialize UI elements and references
+func initialize_ui():
+	# Find main UI container (will be implemented when we have the actual UI scenes)
+	# main_container = get_node("/root/Main/UIContainer")
+	
+	# Load UI sounds (commented out until we have actual sounds)
+	# sound_button_click = load("res://assets/sounds/button_click.wav")
+	# sound_popup_show = load("res://assets/sounds/popup_show.wav")
+	# sound_notification = load("res://assets/sounds/notification.wav")
+	# sound_success = load("res://assets/sounds/success.wav")
+	# sound_failure = load("res://assets/sounds/failure.wav")
+	
+	print("UIManager: UI system initialized")
+	emit_signal("ui_initialized")
+
+# Change to a different UI screen with animation
+func change_screen(new_screen_node: Control):
+	if not is_instance_valid(new_screen_node):
+		push_error("UIManager: Invalid screen node provided")
+		return
+	
+	var old_screen = current_screen
+	
+	# Animate out the current screen if it exists
+	if is_instance_valid(current_screen):
+		animate_screen_out(current_screen)
+		await get_tree().create_timer(transition_out_time).timeout
+	
+	# Hide all screens
+	if main_container:
+		for child in main_container.get_children():
+			if child is Control:
+				child.visible = false
+	
+	# Show and animate in the new screen
+	current_screen = new_screen_node
+	current_screen.visible = true
+	animate_screen_in(current_screen)
+	
+	emit_signal("screen_changed", old_screen, current_screen)
+	print("UIManager: Changed screen to %s" % current_screen.name)
+
+# Animate a screen coming into view
+func animate_screen_in(screen: Control):
+	if not is_instance_valid(screen):
+		return
+	
+	# Reset properties
+	screen.modulate.a = 0
+	screen.scale = Vector2(0.95, 0.95)
+	
+	# Create tween for animation
+	var tween = create_tween()
+	tween.set_parallel(true)
+	tween.set_trans(default_transition_type)
+	tween.set_ease(Tween.EASE_OUT)
+	
+	# Animate properties
+	tween.tween_property(screen, "modulate:a", 1.0, transition_in_time)
+	tween.tween_property(screen, "scale", Vector2(1, 1), transition_in_time)
+	
+	# Play sound if available
+	# if sound_popup_show:
+	#     AudioManager.play_sfx(sound_popup_show)
+
+# Animate a screen going out of view
+func animate_screen_out(screen: Control):
+	if not is_instance_valid(screen):
+		return
+	
+	# Create tween for animation
+	var tween = create_tween()
+	tween.set_parallel(true)
+	tween.set_trans(default_transition_type)
+	tween.set_ease(Tween.EASE_IN)
+	
+	# Animate properties
+	tween.tween_property(screen, "modulate:a", 0.0, transition_out_time)
+	tween.tween_property(screen, "scale", Vector2(1.05, 1.05), transition_out_time)
+	
+	# Queue hiding the screen when animation is complete
+	await tween.finished
+	screen.visible = false
+
+# Show a popup window
+func show_popup(popup: Control):
+	if not is_instance_valid(popup):
+		return
+	
+	# Reset properties
+	popup.modulate.a = 0
+	popup.scale = Vector2(0.9, 0.9)
+	popup.visible = true
+	
+	# Create tween for animation
+	var tween = create_tween()
+	tween.set_parallel(true)
+	tween.set_trans(default_transition_type)
+	tween.set_ease(Tween.EASE_OUT)
+	
+	# Animate properties
+	tween.tween_property(popup, "modulate:a", 1.0, transition_in_time)
+	tween.tween_property(popup, "scale", Vector2(1, 1), transition_in_time)
+	
+	# Play sound if available
+	# if sound_popup_show:
+	#     AudioManager.play_sfx(sound_popup_show)
+
+# Hide a popup window
+func hide_popup(popup: Control):
+	if not is_instance_valid(popup):
+		return
+	
+	# Create tween for animation
+	var tween = create_tween()
+	tween.set_parallel(true)
+	tween.set_trans(default_transition_type)
+	tween.set_ease(Tween.EASE_IN)
+	
+	# Animate properties
+	tween.tween_property(popup, "modulate:a", 0.0, transition_out_time)
+	tween.tween_property(popup, "scale", Vector2(0.9, 0.9), transition_out_time)
+	
+	# Queue hiding the popup when animation is complete
+	await tween.finished
+	popup.visible = false
+
+# Show a toast notification
+func show_toast(message: String, type: String = "info", duration: float = -1):
+	if toast_container == null:
+		push_error("UIManager: Cannot show toast - toast_container not set")
+		return
+	
+	var toast = load("res://scenes/ui/toast_notification.tscn").instantiate()
+	
+	# Set toast duration
+	var toast_time = duration if duration > 0 else toast_duration
+	
+	# Configure and add the toast
+	toast.setup(message, type, toast_time)
+	toast_container.add_child(toast)
+	active_toasts.append(toast)
+	
+	# Play sound based on type (to be implemented when we have sounds)
+	# if type == "success" and sound_success:
+	#     AudioManager.play_sfx(sound_success)
+	# elif type == "error" and sound_failure:
+	#     AudioManager.play_sfx(sound_failure)
+	# elif sound_notification:
+	#     AudioManager.play_sfx(sound_notification)
+	
+	emit_signal("toast_displayed", message)
+	print("UIManager: Toast notification - %s" % message)
+
+# Remove a specific toast notification
+func remove_toast(toast: Control):
+	if not is_instance_valid(toast):
+		return
+	
+	if toast in active_toasts:
+		active_toasts.erase(toast)
+	
+	# Animate out the toast
+	var tween = create_tween()
+	tween.tween_property(toast, "modulate:a", 0.0, 0.3)
+	
+	await tween.finished
+	
+	# Remove the toast from the scene
+	if is_instance_valid(toast) and toast.is_inside_tree():
+		toast.queue_free()
+
+# Clear all active toast notifications
+func clear_all_toasts():
+	for toast in active_toasts:
+		if is_instance_valid(toast):
+			remove_toast(toast)
+	
+	active_toasts.clear()
+
+# Play a button click sound
+func play_button_sound():
+	# Will be implemented when we have sounds
+	# if sound_button_click:
+	#     AudioManager.play_sfx(sound_button_click)
+	pass
+
+# Set the main UI container
+func set_main_container(container: Control):
+	main_container = container
+	print("UIManager: Set main container to %s" % container.name)
+
+# Set the toast container
+func set_toast_container(container: Control):
+	toast_container = container
+	print("UIManager: Set toast container to %s" % container.name)

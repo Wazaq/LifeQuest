@@ -1,0 +1,48 @@
+[gd_scene load_steps=3 format=3 uid="uid://vxvn0u7kvv64"]
+
+[ext_resource type="Script" uid="uid://cds3g4sf8yq6s" path="res://scripts/main.gd" id="1_0wfyh"]
+[ext_resource type="Theme" uid="uid://tswwpjjq4cws" path="res://assets/themes/fantasy_theme.tres" id="1_o5qli"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_0wfyh")
+
+[node name="UIRoot" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_o5qli")
+
+[node name="Background" type="ColorRect" parent="UIRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.12, 0.12, 0.17, 1)
+
+[node name="MainContainer" type="MarginContainer" parent="UIRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="ScreensContainer" type="Control" parent="UIRoot/MainContainer"]
+layout_mode = 2
+
+[node name="NotificationLayer" type="Control" parent="UIRoot"]
+layout_mode = 1
+anchors_preset = 0
+
+[node name="PopupLayer" type="Control" parent="UIRoot"]
+layout_mode = 1
+anchors_preset = 0
