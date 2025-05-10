@@ -116,7 +116,10 @@ func animate_screen_out(screen: Control):
 	
 	# Queue hiding the screen when animation is complete
 	await tween.finished
-	screen.visible = false
+	
+	# Check if the screen is still valid before trying to hide it
+	if is_instance_valid(screen):
+		screen.visible = false
 
 # Show a popup window
 func show_popup(popup: Control):
@@ -159,22 +162,52 @@ func hide_popup(popup: Control):
 	
 	# Queue hiding the popup when animation is complete
 	await tween.finished
-	popup.visible = false
+	
+	# Check if the popup is still valid before trying to hide it
+	if is_instance_valid(popup):
+		popup.visible = false
 
 # Show a toast notification
 func show_toast(message: String, type: String = "info", duration: float = -1):
+	print("UIManager: Attempting to show toast with message: " + message)
+	
 	if toast_container == null:
 		push_error("UIManager: Cannot show toast - toast_container not set")
 		return
 	
-	var toast = load("res://scenes/ui/toast_notification.tscn").instantiate()
+	print("UIManager: Toast container exists, loading scene...")
+	var toast_scene = load("res://scenes/ui/toast_notification.tscn")
+	if toast_scene == null:
+		push_error("UIManager: Failed to load toast notification scene")
+		return
+		
+	print("UIManager: Scene loaded, instantiating...")
+	var toast = toast_scene.instantiate()
+	if toast == null:
+		push_error("UIManager: Failed to instantiate toast")
+		return
+	
+	print("UIManager: Toast instantiated, setting up...")
 	
 	# Set toast duration
 	var toast_time = duration if duration > 0 else toast_duration
 	
 	# Configure and add the toast
 	toast.setup(message, type, toast_time)
+	
+	# Make sure the toast is added with the correct anchors
 	toast_container.add_child(toast)
+	
+	# Ensure the toast is positioned correctly at the top center
+	toast.anchor_left = 0.5
+	toast.anchor_top = 0.0 
+	toast.anchor_right = 0.5
+	toast.anchor_bottom = 0.0
+	toast.offset_left = -200
+	toast.offset_top = 20
+	toast.offset_right = 200
+	toast.offset_bottom = 80
+	
 	active_toasts.append(toast)
 	
 	# Play sound based on type (to be implemented when we have sounds)
@@ -186,7 +219,7 @@ func show_toast(message: String, type: String = "info", duration: float = -1):
 	#     AudioManager.play_sfx(sound_notification)
 	
 	emit_signal("toast_displayed", message)
-	print("UIManager: Toast notification - %s" % message)
+	print("UIManager: Toast notification displayed - %s" % message)
 
 # Remove a specific toast notification
 func remove_toast(toast: Control):
@@ -202,9 +235,10 @@ func remove_toast(toast: Control):
 	
 	await tween.finished
 	
-	# Remove the toast from the scene
-	if is_instance_valid(toast) and toast.is_inside_tree():
-		toast.queue_free()
+	# Remove the toast from the scene if it's still valid
+	if is_instance_valid(toast):
+		if toast.is_inside_tree():
+			toast.queue_free()
 
 # Clear all active toast notifications
 func clear_all_toasts():

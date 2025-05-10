@@ -17,6 +17,9 @@ var fade_in_time: float = 0.3
 var fade_out_time: float = 0.5
 
 func _ready():
+	if message_label == null:
+		push_error("Toast notification message label is null!")
+		
 	# Start invisible
 	modulate.a = 0
 	
@@ -25,7 +28,13 @@ func _ready():
 
 # Setup the notification with message and type
 func setup(message: String, type: String = "info", time: float = 3.0):
-	message_label.text = message
+	# Use direct node access instead of relying on @onready var
+	var label = get_node_or_null("HBoxContainer/MessageLabel")
+	if label == null:
+		push_error("Toast: Could not find MessageLabel node")
+		return
+		
+	label.text = message
 	display_time = time
 	
 	# Apply style based on type

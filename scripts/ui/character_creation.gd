@@ -10,6 +10,49 @@ func _ready():
 	# Connect signals
 	create_button.connect("pressed", Callable(self, "_on_create_button_pressed"))
 
+# Helper function to find the screens container by traversing up from this node
+func find_screens_container() -> Control:
+	# First try getting it from UIManager
+	if get_node_or_null("/root/UIManager") and UIManager.main_container:
+		return UIManager.main_container
+	
+	# If not found, try finding it in the scene tree
+	var current_node = self
+	var max_iterations = 10  # Avoid infinite loops
+	var iteration = 0
+	
+	while current_node and iteration < max_iterations:
+		# If this is the screens container itself
+		if current_node.name == "ScreensContainer":
+			return current_node
+		
+		# Look for a ScreensContainer child
+		var screens = current_node.get_node_or_null("ScreensContainer")
+		if screens:
+			return screens
+		
+		# Look for deeper paths
+		screens = current_node.get_node_or_null("UIRoot/MainContainer/ScreensContainer")
+		if screens:
+			return screens
+		
+		screens = current_node.get_node_or_null("MainContainer/ScreensContainer")
+		if screens:
+			return screens
+		
+		# Go up to parent
+		current_node = current_node.get_parent()
+		iteration += 1
+	
+	# Last resort: try to find it directly from the root
+	var root = get_tree().get_root()
+	var node = root.get_node_or_null("Main/UIRoot/MainContainer/ScreensContainer")
+	if node:
+		return node
+	
+	# Could not find it
+	return null
+
 func _on_create_button_pressed():
 	var character_name = name_edit.text.strip_edges()
 	
@@ -38,17 +81,20 @@ func _on_create_button_pressed():
 				# Load the main menu scene
 				var main_menu = load("res://scenes/main_menu/main_menu.tscn").instantiate()
 				
-				# Add it to the screens container
-				var main = get_tree().get_root().get_node("Main")
-				var screens_container = main.get_node("UIRoot/MainContainer/ScreensContainer")
+				# Find the screens container by going up the node tree from this node
+				var screens_container = find_screens_container()
 				
-				# Change to the main menu screen
-				screens_container.add_child(main_menu)
-				
-				if get_node_or_null("/root/UIManager"):
-					UIManager.change_screen(main_menu)
+				if screens_container:
+					# Change to the main menu screen
+					screens_container.add_child(main_menu)
 					
-				# Queue self for removal
+					if get_node_or_null("/root/UIManager"):
+						UIManager.change_screen(main_menu)
+				else:
+					push_error("CharacterCreation: Could not find screens container")
+					
+				# Queue self for removal after a short delay to ensure animations complete
+				await get_tree().create_timer(0.5).timeout
 				queue_free()
 			else:
 				if get_node_or_null("/root/UIManager"):
