@@ -1,0 +1,78 @@
+[gd_scene load_steps=2 format=3 uid="uid://drdobpo4kcl7b"]
+
+[ext_resource type="Script" uid="uid://kw2uks7tcfv8" path="res://scripts/ui/quest_details.gd" id="1_628yn"]
+
+[node name="QuestDetails" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_628yn")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="HeaderSection" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="QuestNameLabel" type="Label" parent="VBoxContainer/HeaderSection"]
+layout_mode = 2
+text = "Quest Name"
+
+[node name="QuestIcon" type="TextureRect" parent="VBoxContainer/HeaderSection"]
+layout_mode = 2
+
+[node name="TimeLabel" type="Label" parent="VBoxContainer/HeaderSection"]
+layout_mode = 2
+text = "Expires in 3 days"
+
+[node name="DescriptionSection" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="DescriptionLabel" type="Label" parent="VBoxContainer/DescriptionSection"]
+layout_mode = 2
+text = "Quest description goes here..."
+
+[node name="InfoSection" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="DifficultyRow" type="HBoxContainer" parent="VBoxContainer/InfoSection"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/InfoSection/DifficultyRow"]
+layout_mode = 2
+text = "Difficulty:"
+
+[node name="ValueLabel" type="Label" parent="VBoxContainer/InfoSection/DifficultyRow"]
+layout_mode = 2
+text = "Intermediate"
+
+[node name="XPRow" type="HBoxContainer" parent="VBoxContainer/InfoSection"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/InfoSection/XPRow"]
+layout_mode = 2
+text = "XP Reward:"
+
+[node name="ValueLabel" type="Label" parent="VBoxContainer/InfoSection/XPRow"]
+layout_mode = 2
+text = "3 XP"
+
+[node name="CategoriesRow" type="HBoxContainer" parent="VBoxContainer/InfoSection"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/InfoSection/CategoriesRow"]
+layout_mode = 2
+text = "Categories:"
+
+[node name="ValueLabel" type="Label" parent="VBoxContainer/InfoSection/CategoriesRow"]
+layout_mode = 2
+text = "Routine, Home"
+
+[node name="ActionButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Accept Quest"
+
+[node name="BackButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Back"

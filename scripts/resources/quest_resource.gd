@@ -65,7 +65,10 @@ func from_dictionary(data: Dictionary):
 	description = data.get("description", "")
 	difficulty = data.get("difficulty", 0)
 	category = data.get("category", "")
-	tags = data.get("tags", [])
+	var tag_array = data.get("tags", [])
+	tags.clear() # Clear the existing array
+	for tag in tag_array:
+		tags.append(tag as String) # Append each element as string
 	icon_path = data.get("icon_path", "")
 	is_multi_step = data.get("is_multi_step", false)
 	total_steps = data.get("total_steps", 1)

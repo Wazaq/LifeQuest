@@ -76,6 +76,77 @@ func change_screen(new_screen_node: Control):
 	emit_signal("screen_changed", old_screen, current_screen)
 	print("UIManager: Changed screen to %s" % current_screen.name)
 
+# Open a screen by name with optional data
+func open_screen(screen_name: String, data = null):
+	print("UIManager: Attempting to open screen: %s" % screen_name)
+	
+	if not main_container:
+		push_error("UIManager: Cannot open screen - main_container not set")
+		return
+		
+	var screen_path = ""
+	
+	# Map screen name to scene path
+	match screen_name:
+		"quest_board":
+			screen_path = "res://scenes/quests/quest_board.tscn"
+		"quest_details":
+			screen_path = "res://scenes/quests/quest_details.tscn"
+		"quest_creation":
+			screen_path = "res://scenes/quests/quest_creation.tscn"
+		"main_menu":
+			screen_path = "res://scenes/main_menu/main_menu.tscn"
+		"character_creation":
+			screen_path = "res://scenes/character/character_creation.tscn"
+		_:
+			push_error("UIManager: Unknown screen name: %s" % screen_name)
+			return
+	
+	# Load and instantiate the screen
+	var screen_scene = load(screen_path)
+	if not screen_scene:
+		push_error("UIManager: Failed to load screen scene: %s" % screen_path)
+		return
+		
+	var screen_instance = screen_scene.instantiate()
+	if not screen_instance:
+		push_error("UIManager: Failed to instantiate screen: %s" % screen_path)
+		return
+	
+	# Add to container
+	main_container.add_child(screen_instance)
+	
+	# Initialize with data if needed
+	if data != null and screen_instance.has_method("initialize"):
+		screen_instance.initialize(data)
+	
+	# Change to the new screen
+	change_screen(screen_instance)
+
+# Go back to previous screen
+func go_back():
+	# Find the previous screen in the container
+	if not main_container or not current_screen:
+		return
+		
+	# Get children and find current screen index
+	var children = main_container.get_children()
+	var current_index = children.find(current_screen)
+	
+	if current_index <= 0 or current_index >= children.size():
+		# No previous screen, try to go to main menu
+		open_screen("main_menu")
+		return
+		
+	# Get previous screen
+	var previous_screen = children[current_index - 1]
+	
+	# Change to previous screen
+	change_screen(previous_screen)
+	
+	# Queue free the current screen
+	current_screen.queue_free()
+
 # Animate a screen coming into view
 func animate_screen_in(screen: Control):
 	if not is_instance_valid(screen):

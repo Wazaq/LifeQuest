@@ -149,6 +149,3 @@ func _on_reset_button_pressed():
 			
 		# Queue self for removal
 		queue_free()
-			
-		# Queue self for removal
-		queue_free()
