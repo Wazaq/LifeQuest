@@ -121,6 +121,7 @@ layout_mode = 2
 text = "0 days"
 
 [node name="ButtonsSection" type="HBoxContainer" parent="ProfilePanel/MarginContainer/MainVBox"]
+visible = false
 layout_mode = 2
 alignment = 1
 

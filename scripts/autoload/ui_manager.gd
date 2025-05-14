@@ -83,7 +83,33 @@ func open_screen(screen_name: String, data = null):
 	if not main_container:
 		push_error("UIManager: Cannot open screen - main_container not set")
 		return
+	
+	# Check if we're using the new navigation system
+	var main_node = get_node_or_null("/root/Main")
+	if main_node and main_node.has_method("_navigate_to"):
+		# Use the navigation container's method
+		match screen_name:
+			"quest_board":
+				main_node._navigate_to(main_node.ScreenState.QUEST_BOARD, data)
+			"quest_details":
+				main_node._navigate_to(main_node.ScreenState.QUEST_DETAILS, data)
+			"quest_creation":
+				main_node._navigate_to(main_node.ScreenState.QUEST_CREATION, data)
+			"main_menu":
+				main_node._navigate_to(main_node.ScreenState.MAIN_MENU, data)
+			"character_creation":
+				main_node._navigate_to(main_node.ScreenState.CHARACTER_CREATION, data)
+			"character_profile":
+				main_node._navigate_to(main_node.ScreenState.CHARACTER_PROFILE, data)
+			"adventures":
+				main_node._navigate_to(main_node.ScreenState.ADVENTURES, data)
+			"more":
+				main_node._navigate_to(main_node.ScreenState.MORE, data)
+			_:
+				push_error("UIManager: Unknown screen name: %s" % screen_name)
+		return
 		
+	# Legacy method for backward compatibility
 	var screen_path = ""
 	
 	# Map screen name to scene path
@@ -127,6 +153,15 @@ func open_screen(screen_name: String, data = null):
 
 # Go back to previous screen
 func go_back():
+	# Check if we're using the new navigation system
+	var main_node = get_node_or_null("/root/Main")
+	if main_node and main_node.has_method("_navigate_to") and main_node.previous_screen_states.size() > 0:
+		# Navigate to the previous screen
+		var previous_state = main_node.previous_screen_states.pop_back()
+		main_node._navigate_to(previous_state)
+		return
+	
+	# Legacy method for backward compatibility
 	# Find the previous screen in the container
 	if not main_container or not current_screen:
 		return

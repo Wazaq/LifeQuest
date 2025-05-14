@@ -8,6 +8,7 @@ var enabled_features = {
 	"notifications": true,
 	"tutorials": true,
 	"achievements": true,
+	"adventures": true,    # For bottom nav visibility
 	"social_features": false,  # Planned for future
 	"daily_passes": false,     # Later MVP
 	"user_auth": false         # Later MVP

@@ -1,0 +1,40 @@
+[gd_scene load_steps=2 format=3 uid="uid://bit487aurfd6j"]
+
+[ext_resource type="Script" uid="uid://wyq0aq6hx0nb" path="res://scripts/ui/more_screen.gd" id="1_uei6w"]
+
+[node name="MoreScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_uei6w")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.15, 0.15, 0.2, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="HeaderLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "More Options"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="ResetButton" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Reset Game (Debug)"

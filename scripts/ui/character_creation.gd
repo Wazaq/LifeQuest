@@ -75,7 +75,17 @@ func _on_create_button_pressed():
 				if get_node_or_null("/root/UIManager"):
 					UIManager.show_toast("Character created successfully!", "success")
 				
-				# Navigate to the main menu
+				# Check if we're using the new navigation system
+				var main_node = get_node_or_null("/root/Main")
+				if main_node and main_node.has_method("_navigate_to"):
+					# Use the "_on_character_created" callback to handle navigation
+					if main_node.has_method("_on_character_created"):
+						main_node._on_character_created()
+					else:
+						main_node._navigate_to(main_node.ScreenState.TAVERN_HUB)
+					return
+					
+				# Legacy approach - navigate to the main menu
 				print("CharacterCreation: Navigating to main_menu.tscn")
 				
 				# Load the main menu scene

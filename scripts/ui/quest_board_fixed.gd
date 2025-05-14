@@ -39,6 +39,13 @@ func _ready():
 	$MarginContainer.anchor_right = 1.0
 	$MarginContainer.anchor_bottom = 1.0
 	
+	# Add bottom margin to prevent overlap with bottom nav bar
+	var bottom_margin = 90  # Height of bottom nav bar + some padding
+	$MarginContainer.add_theme_constant_override("margin_bottom", bottom_margin)
+	$MarginContainer.add_theme_constant_override("margin_left", 10)
+	$MarginContainer.add_theme_constant_override("margin_right", 10)
+	$MarginContainer.add_theme_constant_override("margin_top", 10)
+	
 	# Connect signals
 	if get_node_or_null("/root/QuestManager"):
 		QuestManager.quest_started.connect(_on_quest_started)

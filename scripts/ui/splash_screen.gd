@@ -80,7 +80,13 @@ func _on_start_button_pressed():
 		has_character = DataManager.has_character_save()
 	
 	if has_character:
-		# Actually navigate to the main menu scene
+		# Check if we're using the new navigation system
+		var main_node = get_node_or_null("/root/Main")
+		if main_node and main_node.has_method("_navigate_to"):
+			main_node._navigate_to(main_node.ScreenState.TAVERN_HUB)
+			return
+		
+		# Legacy approach - actually navigate to the main menu scene
 		print("SplashScreen: Navigating to main_menu.tscn")
 		
 		# Load the main menu scene
@@ -105,7 +111,13 @@ func _on_start_button_pressed():
 			if get_node_or_null("/root/UIManager"):
 				UIManager.show_toast("Error: Could not find screens container", "error")
 	else:
-		# Navigate to character creation scene
+		# Check if we're using the new navigation system
+		var main_node = get_node_or_null("/root/Main")
+		if main_node and main_node.has_method("_navigate_to"):
+			main_node._navigate_to(main_node.ScreenState.CHARACTER_CREATION)
+			return
+			
+		# Legacy approach - navigate to character creation scene
 		print("SplashScreen: Navigating to character_creation.tscn")
 		
 		# Load the character creation scene

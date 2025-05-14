@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://vxvn0u7kvv64"]
+[gd_scene load_steps=5 format=3 uid="uid://vxvn0u7kvv64"]
 
-[ext_resource type="Script" uid="uid://cds3g4sf8yq6s" path="res://scripts/main.gd" id="1_0wfyh"]
+[ext_resource type="Script" uid="uid://belcw5nfbpuei" path="res://scripts/ui/navigation_container.gd" id="1_0wfyh"]
 [ext_resource type="Theme" uid="uid://tswwpjjq4cws" path="res://assets/themes/fantasy_theme.tres" id="1_o5qli"]
+[ext_resource type="PackedScene" uid="uid://pr1y6pn052lh" path="res://scenes/ui/bottom_nav_bar.tscn" id="3_jyhfs"]
+[ext_resource type="Script" uid="uid://q817c5ex8eaf" path="res://scripts/ui/bottom_nav_bar.gd" id="4_tbgi4"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_0wfyh")
@@ -51,3 +53,14 @@ mouse_filter = 2
 [node name="PopupLayer" type="Control" parent="UIRoot"]
 layout_mode = 1
 anchors_preset = 0
+
+[node name="BottomNavBar" type="Control" parent="UIRoot" instance=ExtResource("3_jyhfs")]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("4_tbgi4")
