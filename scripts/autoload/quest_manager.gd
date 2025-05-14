@@ -37,7 +37,8 @@ var available_quests = {}  # Quests available to take by ID
 var completed_quests = {}  # Completed quests with timestamps by ID
 var failed_quests = []  # Failed quests with timestamps
 
-# Configuration
+# Quest configuration
+var max_active_quests = 3  # Maximum number of active quests allowed
 var available_quest_count = 5  # Number of quests available at once
 var last_refresh_time = 0  # Unix timestamp of last quest refresh
 
@@ -268,12 +269,28 @@ func get_difficulty_name(difficulty: int) -> String:
 		_:
 			return "Unknown"
 
+# Get a random quest from the available quests
+func get_random_quest():
+	# If no available quests, return null
+	if available_quests.is_empty():
+		print("QuestManager: No available quests to select from")
+		return null
+	
+	# Get random quest ID from available quests
+	var available_ids = available_quests.keys()
+	available_ids.shuffle()
+	var random_id = available_ids[0]
+	
+	print("QuestManager: Selected random quest - %s" % available_quests[random_id].title)
+	return available_quests[random_id]
+
 # Get the available quests dictionary
 func get_available_quests() -> Dictionary:
 	return available_quests
 
 # Refresh the list of available quests
 func refresh_available_quests():
+	print("QuestManager: Refresh Available quests")
 	available_quests.clear()
 	
 	# Get all quests not active or on cooldown
@@ -330,23 +347,19 @@ func _is_cooldown_complete(completion_time: int, cooldown_hours: int) -> bool:
 	
 	return (current_time - completion_time) >= cooldown_seconds
 
-# Get a random available quest
-func get_random_quest() -> QuestResource:
-	# Make sure available quests are refreshed
-	if available_quests.is_empty():
-		refresh_available_quests()
-		
-	if available_quests.is_empty():
-		return null
-		
-	# Randomly select from available quests
-	var keys = available_quests.keys()
-	keys.shuffle()
+# Reset cooldowns for all completed quests
+func reset_all_cooldowns():
+	# Remove all cooldowns from completed quests
+	for quest_id in completed_quests.keys():
+		# Just update the completion time to way in the past
+		completed_quests[quest_id]["completion_time"] = 0
 	
-	if keys.size() > 0:
-		return available_quests[keys[0]]
+	print("QuestManager: Reset all quest cooldowns")
 	
-	return null
+	# Refresh the available quests
+	refresh_available_quests()
+	
+	return completed_quests.size()
 
 # Add example quests for development
 func add_example_quests():

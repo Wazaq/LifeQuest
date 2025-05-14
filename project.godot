@@ -23,6 +23,10 @@ ProfileManager="*res://scripts/autoload/profile_manager.gd"
 DataManager="*res://scripts/autoload/data_manager.gd"
 UIManager="*res://scripts/autoload/ui_manager.gd"
 
+[display]
+
+window/handheld/orientation=1
+
 [rendering]
 
 renderer/rendering_method="mobile"

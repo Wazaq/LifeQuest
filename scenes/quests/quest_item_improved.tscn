@@ -1,28 +1,31 @@
-[gd_scene load_steps=2 format=3 uid="uid://heq7guid53el"]
+[gd_scene load_steps=2 format=3 uid="uid://t28xiouuaqmn"]
 
-[ext_resource type="Script" uid="uid://ki54g7tl5ikj" path="res://scripts/ui/quest_item.gd" id="1_nvc8c"]
+[ext_resource type="Script" uid="uid://ki54g7tl5ikj" path="res://scripts/ui/quest_item.gd" id="1_n32vw"]
 
-[node name="QuestItem" type="Control"]
-layout_mode = 3
-anchors_preset = 0
-script = ExtResource("1_nvc8c")
+[node name="QuestItem" type="PanelContainer"]
+custom_minimum_size = Vector2(0, 60)
+size_flags_horizontal = 3
+script = ExtResource("1_n32vw")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
-layout_mode = 0
+layout_mode = 2
 
 [node name="QuestIcon" type="TextureRect" parent="HBoxContainer"]
+custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
+expand_mode = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="QuestNameLabel" type="Label" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
-text = "Quest Name"
+text = "Quest Title"
 
 [node name="TimeLabel" type="Label" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
-text = "Expires in 3 days"
+text = "Intermediate"
 
 [node name="DetailButton" type="Button" parent="HBoxContainer"]
 layout_mode = 2

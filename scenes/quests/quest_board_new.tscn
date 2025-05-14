@@ -1,0 +1,97 @@
+[gd_scene load_steps=2 format=3 uid="uid://5vq4ptnhxqym"]
+
+[ext_resource type="Script" uid="uid://yjxfpnxynuvw" path="res://scripts/ui/quest_board_fixed.gd" id="1_qrftn"]
+
+[node name="QuestBoard" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_qrftn")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="ActiveQuestSectionBG" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ActiveQuestsSection" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ActiveQuestSectionBG"]
+layout_mode = 2
+
+[node name="HeaderRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ActiveQuestSectionBG/ActiveQuestsSection"]
+layout_mode = 2
+
+[node name="HeaderLabel" type="Label" parent="MarginContainer/VBoxContainer/ActiveQuestSectionBG/ActiveQuestsSection/HeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Active Quests"
+
+[node name="CountLabel" type="Label" parent="MarginContainer/VBoxContainer/ActiveQuestSectionBG/ActiveQuestsSection/HeaderRow"]
+layout_mode = 2
+text = "0 active"
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer/ActiveQuestSectionBG/ActiveQuestsSection"]
+layout_mode = 2
+
+[node name="ActiveQuestsScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/ActiveQuestSectionBG/ActiveQuestsSection"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ActiveQuestsContainerNew" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ActiveQuestSectionBG/ActiveQuestsSection/ActiveQuestsScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AvailQuestSectionBG" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AvailableQuestsSection" type="VBoxContainer" parent="MarginContainer/VBoxContainer/AvailQuestSectionBG"]
+layout_mode = 2
+
+[node name="HeaderRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/AvailQuestSectionBG/AvailableQuestsSection"]
+layout_mode = 2
+
+[node name="HeaderLabel" type="Label" parent="MarginContainer/VBoxContainer/AvailQuestSectionBG/AvailableQuestsSection/HeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Available Quests"
+
+[node name="RefreshButton" type="Button" parent="MarginContainer/VBoxContainer/AvailQuestSectionBG/AvailableQuestsSection/HeaderRow"]
+layout_mode = 2
+text = "Refresh"
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer/AvailQuestSectionBG/AvailableQuestsSection"]
+layout_mode = 2
+
+[node name="AvailableQuestsScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/AvailQuestSectionBG/AvailableQuestsSection"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="AvailableQuestsContainerNew" type="VBoxContainer" parent="MarginContainer/VBoxContainer/AvailQuestSectionBG/AvailableQuestsSection/AvailableQuestsScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="GetNewQuestButton" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Get New Quest"
+
+[node name="ResetCooldownButton" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Reset Quest Cooldown"

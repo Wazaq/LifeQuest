@@ -89,7 +89,7 @@ func open_screen(screen_name: String, data = null):
 	# Map screen name to scene path
 	match screen_name:
 		"quest_board":
-			screen_path = "res://scenes/quests/quest_board.tscn"
+			screen_path = "res://scenes/quests/quest_board_new.tscn"
 		"quest_details":
 			screen_path = "res://scenes/quests/quest_details.tscn"
 		"quest_creation":

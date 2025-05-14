@@ -64,7 +64,8 @@ func _on_quests_button_pressed():
 	
 	# Show a message since we don't have the quests screen yet
 	if get_node_or_null("/root/UIManager"):
-		UIManager.show_toast("Quests screen would open here", "info")
+		UIManager.open_screen("quest_board")
+		#UIManager.show_toast("Quests screen would open here", "info")
 
 func _on_character_button_pressed():
 	print("MainMenu: Character button pressed")
