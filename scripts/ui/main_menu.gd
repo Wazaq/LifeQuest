@@ -70,9 +70,12 @@ func _on_quests_button_pressed():
 func _on_character_button_pressed():
 	print("MainMenu: Character button pressed")
 	
-	# Show a message since we don't have the character profile screen yet
+	# Open character profile screen
 	if get_node_or_null("/root/UIManager"):
-		UIManager.show_toast("Character profile would open here", "info")
+		print("MainMenu: Opening character profile screen")
+		UIManager.open_screen("character_profile")
+	else:
+		print("MainMenu: UIManager not found!")
 
 # Helper function to find the screens container by traversing up from this node
 func find_screens_container() -> Control:

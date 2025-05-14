@@ -98,6 +98,8 @@ func open_screen(screen_name: String, data = null):
 			screen_path = "res://scenes/main_menu/main_menu.tscn"
 		"character_creation":
 			screen_path = "res://scenes/character/character_creation.tscn"
+		"character_profile":
+			screen_path = "res://scenes/character/character_profile.tscn"
 		_:
 			push_error("UIManager: Unknown screen name: %s" % screen_name)
 			return

@@ -231,10 +231,15 @@ func _on_quest_expired(_quest_id):
 	update_quest_display()
 
 func update_button_visibility():
-	# Hide the Get New Quest button if we've reached the max active quests
+	# Update Get New Quest button with quest count
 	if get_node_or_null("/root/QuestManager"):
 		var active_count = QuestManager.active_quests.size()
 		var max_count = QuestManager.max_active_quests
+		var available_count = QuestManager.get_available_quest_count()
 		
 		if get_new_quest_button:
+			# Update button text to include available count
+			get_new_quest_button.text = "Get New Quest (%d available)" % available_count
+			
+			# Hide the button if we've reached the max active quests
 			get_new_quest_button.visible = active_count < max_count

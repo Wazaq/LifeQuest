@@ -288,6 +288,31 @@ func get_random_quest():
 func get_available_quests() -> Dictionary:
 	return available_quests
 
+# Get number of available quests (for UI display)
+func get_available_quest_count() -> int:
+	var eligible_count = 0
+	
+	# Count all quests not active or on cooldown
+	for quest_id in all_quests:
+		# Skip active quests
+		if active_quests.has(quest_id):
+			continue
+		
+		# Check cooldown for completed quests
+		if completed_quests.has(quest_id):
+			var completed_data = completed_quests[quest_id]
+			var completion_time = completed_data.get("completion_time", 0)
+			var cooldown_hours = completed_data.get("cooldown_hours", 0)
+			
+			# Skip if still on cooldown
+			if not _is_cooldown_complete(completion_time, cooldown_hours):
+				continue
+		
+		# Quest is eligible
+		eligible_count += 1
+	
+	return eligible_count
+
 # Refresh the list of available quests
 func refresh_available_quests():
 	print("QuestManager: Refresh Available quests")
