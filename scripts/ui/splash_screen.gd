@@ -114,7 +114,7 @@ func _on_start_button_pressed():
 		# Check if we're using the new navigation system
 		var main_node = get_node_or_null("/root/Main")
 		if main_node and main_node.has_method("_navigate_to"):
-			main_node._navigate_to(main_node.ScreenState.CHARACTER_CREATION)
+			main_node._navigate_to(main_node.ScreenState.CHARACTER_INTRO)
 			return
 			
 		# Legacy approach - navigate to character creation scene

@@ -1,0 +1,186 @@
+[gd_scene load_steps=5 format=3 uid="uid://bb6k5bsc2l1vc"]
+
+[ext_resource type="Script" uid="uid://c2nxjus0h2u51" path="res://scripts/ui/character_intro.gd" id="1_qt6lo"]
+[ext_resource type="Texture2D" uid="uid://dx5sip2bkixf3" path="res://assets/sprites/Tavern_external.png" id="2_keolk"]
+[ext_resource type="Texture2D" uid="uid://dfkwo638627cs" path="res://assets/sprites/Bartender.png" id="2_vpo2j"]
+[ext_resource type="Texture2D" uid="uid://db01pl4v4bwlm" path="res://assets/ui/frames/dialog_frame_transparent.png" id="4_keolk"]
+
+[node name="CharacterIntro" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_qt6lo")
+
+[node name="BackgroundContainer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1149.0
+offset_bottom = 646.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BackgroundFill" type="ColorRect" parent="BackgroundContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="BackgroundImage" type="TextureRect" parent="BackgroundContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_keolk")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CharacterContainer" type="Control" parent="."]
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="TavernKeeper" type="Sprite2D" parent="CharacterContainer"]
+position = Vector2(796, 275)
+scale = Vector2(0.238679, 0.238679)
+texture = ExtResource("2_vpo2j")
+
+[node name="DialogContainer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1149.0
+offset_bottom = 646.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DialogFrame" type="NinePatchRect" parent="DialogContainer"]
+layout_mode = 0
+offset_left = 262.0
+offset_top = 409.0
+offset_right = 869.0
+offset_bottom = 681.0
+texture = ExtResource("4_keolk")
+patch_margin_left = 40
+patch_margin_top = 40
+patch_margin_right = 30
+patch_margin_bottom = 30
+
+[node name="DialogContent" type="Control" parent="DialogContainer/DialogFrame"]
+layout_mode = 1
+anchor_left = 0.1
+anchor_top = 0.15
+anchor_right = 0.9
+anchor_bottom = 0.85
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CharacterName" type="RichTextLabel" parent="DialogContainer/DialogFrame/DialogContent"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_left = 85.0
+offset_top = 15.0
+grow_horizontal = 2
+theme_override_colors/default_color = Color(0.901961, 0.72549, 0.392157, 1)
+theme_override_constants/line_separation = 4
+bbcode_enabled = true
+text = "[b]Narrator[/b]"
+
+[node name="DialogText" type="RichTextLabel" parent="DialogContainer/DialogFrame/DialogContent"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -161.0
+offset_top = -30.0
+offset_right = 179.0
+offset_bottom = 46.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/default_color = Color(0.960784, 0.937255, 0.878431, 1)
+theme_override_constants/line_separation = 4
+theme_override_font_sizes/normal_font_size = 12
+bbcode_enabled = true
+text = "Welcome to the mystical realm of [color=blue]Questeria[/color], a land where heroes forge their destinies through quests and adventures."
+
+[node name="NextButton" type="Button" parent="DialogContainer"]
+visible = false
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -395.913
+offset_top = -46.039
+offset_right = 86.0874
+offset_bottom = 157.961
+grow_horizontal = 0
+grow_vertical = 0
+size_flags_horizontal = 8
+size_flags_vertical = 8
+theme_override_font_sizes/font_size = 80
+text = "Next"
+
+[node name="NameInputContainer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 256.0
+offset_top = 172.0
+offset_right = 656.0
+offset_bottom = 372.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Panel" parent="NameInputContainer"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="MarginContainer" type="MarginContainer" parent="NameInputContainer/Panel"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="NameInputContainer/Panel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="PromptLabel" type="Label" parent="NameInputContainer/Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "What is your name, adventurer?"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="NameInputContainer/Panel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="NameInput" type="LineEdit" parent="NameInputContainer/Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "Enter your name"
+alignment = 1
+
+[node name="ConfirmButton" type="Button" parent="NameInputContainer/Panel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "That's My Name"

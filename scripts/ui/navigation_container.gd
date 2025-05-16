@@ -5,6 +5,7 @@ extends Node
 enum ScreenState {
 	SPLASH,
 	CHARACTER_CREATION,
+	CHARACTER_INTRO,
 	MAIN_MENU,
 	TAVERN_HUB,
 	QUEST_BOARD,
@@ -115,6 +116,9 @@ func _navigate_to(screen_state, data = null):
 			need_bottom_nav = false
 		ScreenState.CHARACTER_CREATION:
 			scene_path = "res://scenes/character/character_creation.tscn"
+			need_bottom_nav = false
+		ScreenState.CHARACTER_INTRO:
+			scene_path = "res://scenes/character/character_intro.tscn"
 			need_bottom_nav = false
 		ScreenState.MAIN_MENU:
 			scene_path = "res://scenes/main_menu/main_menu.tscn"
