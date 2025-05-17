@@ -51,7 +51,7 @@ func create_character(player_name: String, avatar: String = ""):
 	current_character.last_activity = Time.get_unix_time_from_system()
 	
 	emit_signal("character_created", current_character)
-	print("ProfileManager: Created character - %s" % name)
+	print("ProfileManager: Created character - %s" % player_name)
 	return current_character
 
 func update_character(data: Dictionary):
@@ -62,6 +62,9 @@ func update_character(data: Dictionary):
 	emit_signal("character_updated", current_character)
 	print("ProfileManager: Updated character data")
 	return current_character
+	
+func get_character_name() -> String:
+	return current_character.name
 
 func add_xp(amount: int):
 	if amount <= 0:

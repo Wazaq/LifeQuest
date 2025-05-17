@@ -18,7 +18,7 @@ var current_state = NarrativeState.WORLD_INTRO
 @onready var dialog_box = $DialogContainer/DialogFrame
 @onready var dialog_character_name: RichTextLabel = $DialogContainer/DialogFrame/DialogContent/CharacterName
 @onready var dialog_text: RichTextLabel = $DialogContainer/DialogFrame/DialogContent/DialogText
-@onready var next_button: Button = $DialogContainer/NextButton
+#@onready var next_button: Button = $DialogContainer/NextButton
 @onready var name_input_container = $NameInputContainer
 @onready var name_input = $NameInputContainer/Panel/MarginContainer/VBoxContainer/NameInput
 @onready var confirm_name_button = $NameInputContainer/Panel/MarginContainer/VBoxContainer/ConfirmButton
@@ -49,8 +49,8 @@ func _ready():
 	
 	# Pre-load textures
 	background_image.texture = load("res://assets/sprites/Tavern_external.png")
-	tavern_keeper.texture = load("res://assets/sprites/Bartender.png")
-	#dialog_box.texture = load("res://assets/sprites/UI_Dialog_box.png")
+	tavern_keeper.texture = load("res://assets/sprites/Bartender_transparent.png")
+	dialog_box.texture = load("res://assets/ui/frames/dialog_frame_transparent.png")
 	
 	# Set dialog box visible
 	dialog_box.visible = true
@@ -62,8 +62,10 @@ func _ready():
 	tavern_keeper.visible = false
 	
 	# Connect button signals
-	next_button.pressed.connect(_on_next_button_pressed)
+	dialog_box.gui_input.connect(_on_dialog_box_gui_input)
+	#next_button.pressed.connect(_on_next_button_pressed) #TODO: Possible removal
 	confirm_name_button.pressed.connect(_on_confirm_name_pressed)
+	dialog_text.gui_input.connect(_on_dialog_box_gui_input)
 	
 	# Set initial background to world intro
 	_update_state(NarrativeState.WORLD_INTRO)
@@ -87,7 +89,7 @@ func _update_state(new_state):
 		NarrativeState.TAVERN_INTERIOR:
 			background_image.texture = load("res://assets/sprites/Tavern_Interior.png")
 			tavern_keeper.visible = true
-			tavern_keeper.position = Vector2(300, 400)  # We'll adjust this position later
+			tavern_keeper.position = Vector2(200, 400)  # Center of the room in front of bar
 			dialog_index = 0
 			_show_tavern_keeper_dialog()
 			
@@ -112,7 +114,7 @@ func _show_simple_dialog(character_name: String, text: String):
 	dialog_text.text = text
 	
 	# Show the next button
-	next_button.visible = true
+	#next_button.visible = true #TODO: Possible removal
 
 func _show_tavern_keeper_dialog():
 	# Show the current part of the tavern keeper's dialog
@@ -131,6 +133,32 @@ func _show_name_input():
 	
 	# Focus the name input
 	name_input.grab_focus()
+	
+func _on_dialog_box_gui_input(event):
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		#_create_tap_feedback(event.position) #TODO: Possibly remove, including func
+		_on_next_button_pressed() # Move the dialog forward
+		
+	#var tween = create_tween()
+	#tween.tween_property(dialog_box, "modulate", Color(0.9, 0.9, 0.9), 0.1)
+	#tween.tween_property(dialog_box, "modulate", Color(1, 1, 1), 0.1)
+	pass
+	
+func _create_tap_feedback(pos: Vector2):
+	# Create a simple circular feedback at tap position
+	var feedback = ColorRect.new()
+	feedback.color = Color(1, 1, 1, 0.3)
+	feedback.size = Vector2(20, 20)
+	feedback.position = pos - Vector2(10, 10)  # Center at tap position
+	feedback.pivot_offset = Vector2(10, 10)
+	dialog_box.add_child(feedback)
+	
+	# Animate and remove
+	var tween = create_tween()
+	tween.tween_property(feedback, "scale", Vector2(3, 3), 0.3)
+	tween.parallel().tween_property(feedback, "modulate:a", 0.0, 0.3)
+	await tween.finished
+	feedback.queue_free()
 
 func _on_next_button_pressed():
 	match current_state:

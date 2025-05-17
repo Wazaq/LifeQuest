@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3 uid="uid://v8l1el1yvy1y"]
+
+[sub_resource type="Gradient" id="Gradient_h1mvy"]
+colors = PackedColorArray(0.101961, 0.101961, 0.180392, 1, 0.164706, 0.164706, 0.25098, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_ehhre"]
+gradient = SubResource("Gradient_h1mvy")
+width = 256
+height = 256
+fill = 1
+fill_to = Vector2(1, 1)
+
+[node name="BackgroundTexture" type="TextureRect"]
+modulate = Color(1, 1, 1, 0.8)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_ehhre")
