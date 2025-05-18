@@ -28,7 +28,7 @@ UIManager="*res://scripts/autoload/ui_manager.gd"
 window/size/viewport_width=360
 window/size/viewport_height=640
 window/size/borderless=true
-window/stretch/mode="canvas_items"
+window/stretch/mode="viewport"
 window/stretch/aspect="expand"
 window/handheld/orientation=1
 

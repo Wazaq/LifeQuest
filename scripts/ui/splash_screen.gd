@@ -79,16 +79,21 @@ func _on_start_button_pressed():
 	if get_node_or_null("/root/DataManager"):
 		has_character = DataManager.has_character_save()
 	
-	if has_character:
-		# Check if we're using the new navigation system
-		var main_node = get_node_or_null("/root/Main")
-		if main_node and main_node.has_method("_navigate_to"):
+	# First try using the navigation system (preferred approach)
+	var main_node = get_node_or_null("/root/Main")
+	if main_node and main_node.has_method("_navigate_to"):
+		if has_character:
+			# Character exists, go to tavern hub
 			main_node._navigate_to(main_node.ScreenState.TAVERN_HUB)
-			return
-		
-		# Legacy approach - actually navigate to the main menu scene
-		print("SplashScreen: Navigating to main_menu.tscn")
-		
+		else:
+			# No character, go to character intro
+			main_node._navigate_to(main_node.ScreenState.CHARACTER_INTRO)
+		return  # Important! Return here to avoid running legacy code
+	
+	# Legacy approach (fallback) - only runs if navigation system not found
+	print("SplashScreen: Using legacy navigation (fallback)")
+	
+	if has_character:
 		# Load the main menu scene
 		var main_menu = load("res://scenes/main_menu/main_menu.tscn").instantiate()
 		
@@ -102,28 +107,13 @@ func _on_start_button_pressed():
 			if get_node_or_null("/root/UIManager"):
 				UIManager.show_toast("Navigating to Main Menu", "info")
 				UIManager.change_screen(main_menu)
-				
-			# Queue self for removal after a short delay
-			await get_tree().create_timer(0.5).timeout
-			queue_free()
 		else:
 			push_error("SplashScreen: Could not find screens container")
-			if get_node_or_null("/root/UIManager"):
-				UIManager.show_toast("Error: Could not find screens container", "error")
 	else:
-		# Check if we're using the new navigation system
-		var main_node = get_node_or_null("/root/Main")
-		if main_node and main_node.has_method("_navigate_to"):
-			main_node._navigate_to(main_node.ScreenState.CHARACTER_INTRO)
-			return
-			
-		# Legacy approach - navigate to character creation scene
-		print("SplashScreen: Navigating to character_creation.tscn")
-		
 		# Load the character creation scene
 		var character_creation = load("res://scenes/character/character_creation.tscn").instantiate()
 		
-		# Find the screens container by going up the node tree from this node
+		# Find the screens container
 		var screens_container = find_screens_container()
 		
 		if screens_container:
@@ -134,7 +124,7 @@ func _on_start_button_pressed():
 				UIManager.change_screen(character_creation)
 		else:
 			push_error("SplashScreen: Could not find screens container")
-			
-		# Queue self for removal after a short delay to ensure animations complete
-		await get_tree().create_timer(0.5).timeout
-		queue_free()
+	
+	# Queue self for removal after transition
+	await get_tree().create_timer(0.5).timeout
+	queue_free()

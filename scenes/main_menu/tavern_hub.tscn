@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://drejf0edkb2xd"]
+[gd_scene load_steps=4 format=3 uid="uid://drejf0edkb2xd"]
 
 [ext_resource type="Script" uid="uid://bx0of50bewnjx" path="res://scripts/ui/tavern_hub.gd" id="1_cpg3s"]
+[ext_resource type="PackedScene" uid="uid://v8l1el1yvy1y" path="res://scenes/ui/background_texture.tscn" id="2_bbt8p"]
+[ext_resource type="PackedScene" uid="uid://pr1y6pn052lh" path="res://scenes/ui/bottom_nav_bar.tscn" id="3_o8kkw"]
 
 [node name="TavernHub" type="Control"]
 layout_mode = 3
@@ -11,30 +13,62 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_cpg3s")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="BackgroundTexture" parent="." instance=ExtResource("2_bbt8p")]
 layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.15, 0.15, 0.2, 1)
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+grow_horizontal = 1
+grow_vertical = 1
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="TavernInterior" type="TextureRect" parent="."]
 layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+offset_right = 40.0
+offset_bottom = 40.0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="TavernKeeperContainer" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TavernKeeper" type="TextureRect" parent="TavernKeeperContainer"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="InteractionArea" type="Area2D" parent="TavernKeeperContainer"]
+
+[node name="NavigationElements" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="QuestBoardArea" type="TextureButton" parent="NavigationElements"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="CharacterArea" type="TextureButton" parent="NavigationElements"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="AdventuresArea" type="TextureButton" parent="NavigationElements"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="WelcomePanel" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="WelcomeLabel" type="Label" parent="WelcomePanel"]
 layout_mode = 2
 
-[node name="HeaderLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="DailyUpdateLabel" type="Label" parent="WelcomePanel"]
 layout_mode = 2
-text = "Welcome to the Tavern"
-horizontal_alignment = 1
 
-[node name="SubheaderLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Your adventure hub awaits"
-horizontal_alignment = 1
+[node name="BottomNavBar" parent="." instance=ExtResource("3_o8kkw")]
+visible = false
+layout_mode = 1

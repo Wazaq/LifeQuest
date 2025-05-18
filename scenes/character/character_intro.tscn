@@ -9,7 +9,11 @@
 
 [node name="CharacterIntro" type="Control"]
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_qt6lo")
 
 [node name="BackgroundContainer" type="Control" parent="."]
@@ -17,8 +21,6 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = 360.0
-offset_bottom = 640.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -37,7 +39,6 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="debug_tavernInteral" type="TextureRect" parent="BackgroundContainer"]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -49,15 +50,15 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="CharacterContainer" type="Control" parent="."]
-anchors_preset = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = 360.0
-offset_bottom = 640.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="TavernKeeper" type="Sprite2D" parent="CharacterContainer"]
-visible = false
-position = Vector2(259, 403)
+position = Vector2(190, 370)
 scale = Vector2(0.1, 0.1)
 texture = ExtResource("3_keolk")
 
@@ -66,8 +67,6 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = 360.0
-offset_bottom = 640.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -160,12 +159,10 @@ theme_override_font_sizes/font_size = 80
 text = "Tap"
 
 [node name="NameInputContainer" type="Control" parent="."]
-visible = false
 layout_mode = 1
-offset_left = 30.0
-offset_top = 30.0
-offset_right = 330.0
-offset_bottom = 230.0
+offset_left = 15.0
+offset_right = 315.0
+offset_bottom = 180.0
 
 [node name="Panel" type="Panel" parent="NameInputContainer"]
 layout_mode = 1
@@ -194,7 +191,7 @@ theme_override_constants/separation = 20
 [node name="PromptLabel" type="Label" parent="NameInputContainer/Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 17
-text = "What is your name, adventurer?"
+text = "My Name is...."
 horizontal_alignment = 1
 
 [node name="Spacer" type="Control" parent="NameInputContainer/Panel/MarginContainer/VBoxContainer"]

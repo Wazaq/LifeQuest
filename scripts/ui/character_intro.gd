@@ -7,8 +7,13 @@ enum NarrativeState {
 	TAVERN_EXTERIOR,
 	TAVERN_INTERIOR,
 	CHARACTER_CREATION,
-	WELCOME
+	WELCOME,
+	TUTORIAL_OPTION # Player goes to Tutorial
 }
+
+# Background images for when they are needed
+var tavern_ext = "res://assets/sprites/Tavern_external.png"
+var tavern_int = "res://assets/sprites/Tavern_Interior.png"
 
 # Current state in the narrative
 var current_state = NarrativeState.WORLD_INTRO
@@ -30,7 +35,8 @@ var narrative_text = {
 	NarrativeState.TAVERN_EXTERIOR: "You find yourself at the entrance of the legendary 'Seeking Quill' tavern, known throughout the realm as a gathering place for adventurers and quest-seekers.",
 	NarrativeState.TAVERN_INTERIOR: "",  # This will have multiple dialog entries with the tavern keeper
 	NarrativeState.CHARACTER_CREATION: "",  # This will be handled differently with input field
-	NarrativeState.WELCOME: ""  # This will be personalized based on character name
+	NarrativeState.WELCOME: "",  # This will be personalized based on character name
+	NarrativeState.TUTORIAL_OPTION: "" # This sends the player to the Tutorial Scene
 }
 
 # Tavern keeper dialog for TAVERN_INTERIOR state
@@ -77,19 +83,19 @@ func _update_state(new_state):
 	match current_state:
 		NarrativeState.WORLD_INTRO:
 			# We'll use the tavern exterior as a placeholder for world intro for now
-			background_image.texture = load("res://assets/sprites/Tavern_external.png")
+			background_image.texture = load(tavern_ext)
 			tavern_keeper.visible = false
 			_show_simple_dialog("Narrator", narrative_text[current_state])
 			
 		NarrativeState.TAVERN_EXTERIOR:
-			background_image.texture = load("res://assets/sprites/Tavern_external.png")
+			background_image.texture = load(tavern_ext)
 			tavern_keeper.visible = false
 			_show_simple_dialog("Narrator", narrative_text[current_state])
 			
 		NarrativeState.TAVERN_INTERIOR:
-			background_image.texture = load("res://assets/sprites/Tavern_Interior.png")
+			background_image.texture = load(tavern_int)
 			tavern_keeper.visible = true
-			tavern_keeper.position = Vector2(200, 400)  # Center of the room in front of bar
+			tavern_keeper.position = Vector2(190, 370)  # Center of the room in front of bar
 			dialog_index = 0
 			_show_tavern_keeper_dialog()
 			
@@ -101,6 +107,16 @@ func _update_state(new_state):
 			# Personalized welcome message
 			var character_name = ProfileManager.get_character_name()
 			_show_simple_dialog("Dorin", "Well met, " + character_name + "! Welcome to the start of your heroic journey. Let's get you settled in and ready for adventure!")
+			
+			# Short wait before moving to the Tutorial Question
+			await get_tree().create_timer(5.0).timeout
+			_update_state(NarrativeState.TUTORIAL_OPTION) # Move the the Tutorial question
+		
+		NarrativeState.TUTORIAL_OPTION:
+			# Show choice dialog
+			_show_choice_dialog("Dorin",
+			"Would you like me to show you a round the tavern?  I can give you a quick tour of how things work around here.",
+			["Yes, that would be helpful", "No thanks, I'll figure it out"])
 
 func _show_simple_dialog(character_name: String, text: String):
 	# Hide the name input container
@@ -115,6 +131,60 @@ func _show_simple_dialog(character_name: String, text: String):
 	
 	# Show the next button
 	#next_button.visible = true #TODO: Possible removal
+	
+func _show_choice_dialog(character_name: String, text: String, choices: Array):
+	# Hide the name input container
+	name_input_container.visible = false
+	
+	# Show the dialog box
+	dialog_box.visible = true
+	
+	# Set the text
+	dialog_character_name.text = character_name
+	dialog_text.text = text
+	
+	# Create choice buttons
+	var choice_container = VBoxContainer.new()
+	choice_container.name = "ChoiceContainer"
+	dialog_box.add_child(choice_container)
+	
+	# Position below the text
+	choice_container.position = Vector2(
+		dialog_box.size.x / 2 - 100,
+		dialog_box.size.y - 150
+	)
+	choice_container.custom_minimum_size = Vector2(200,100)
+	
+	# Add buttons for each choice
+	for i in range(choices.size()):
+		var button = Button.new()
+		button.text = choices[i]
+		button.custom_minimum_size = Vector2(200,40)
+		choice_container.add_child(button)
+		
+		# Connect button signals
+		button.connect("pressed", Callable(self, "_on_choice_selected").bind(i))
+		
+# Handle choice selection
+func _on_choice_selected(choice_index: int):
+	# Remove the choice container
+	var choice_container = dialog_box.get_node_or_null("ChoiceContainer")
+	if choice_container:
+		choice_container.queue_free()
+	
+	if choice_index == 0:
+		# Yes - Launch tutorial
+		_show_simple_dialog("Dorin", "Excellent! Let me show you around...")
+		# After dialog completes, navigate to tutorial
+		await get_tree().create_timer(2.0).timeout
+		var main_node = get_node_or_null("/root/Main")
+		if main_node and main_node.has_method("_navigate_to"):
+			main_node._navigate_to(main_node.ScreenState.TUTORIAL)
+	else:
+		# No - Go to tavern hub
+		_show_simple_dialog("Dorin", "As you wish! Feel free to explore.  See you around.")
+		await get_tree().create_timer(2.0).timeout
+		_complete_character_creation()
 
 func _show_tavern_keeper_dialog():
 	# Show the current part of the tavern keeper's dialog
