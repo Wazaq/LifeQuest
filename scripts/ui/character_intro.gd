@@ -29,6 +29,15 @@ var current_state = NarrativeState.WORLD_INTRO
 @onready var confirm_name_button = $NameInputContainer/Panel/MarginContainer/VBoxContainer/ConfirmButton
 @onready var tavern_keeper = $CharacterContainer/TavernKeeper
 
+# References to the UI elements for the name selection
+@onready var reroll_button = $NameInputContainer/Panel/MarginContainer/VBoxContainer/RerollButton 
+@onready var male_button = $NameInputContainer/Panel/MarginContainer/VBoxContainer/GenderButtons/MaleButton
+@onready var female_button = $NameInputContainer/Panel/MarginContainer/VBoxContainer/GenderButtons/FemaleButton
+@onready var neutral_button = $NameInputContainer/Panel/MarginContainer/VBoxContainer/GenderButtons/NeutralButton
+
+# Track the current name category selection
+var current_name_category = GameManager.NameCategory.ANY
+
 # Narrative text for each state
 var narrative_text = {
 	NarrativeState.WORLD_INTRO: "Welcome to the mystical realm of Questeria, a land where heroes forge their destinies through quests and adventures.",
@@ -61,6 +70,9 @@ func _ready():
 	# Set dialog box visible
 	dialog_box.visible = true
 	
+	# Make sure Dialog text is clickable
+	dialog_text.mouse_filter = Control.MOUSE_FILTER_STOP
+	
 	# Hide the name input initially
 	name_input_container.visible = false
 	
@@ -72,10 +84,18 @@ func _ready():
 	#next_button.pressed.connect(_on_next_button_pressed) #TODO: Possible removal
 	confirm_name_button.pressed.connect(_on_confirm_name_pressed)
 	dialog_text.gui_input.connect(_on_dialog_box_gui_input)
+	reroll_button.pressed.connect(_on_reroll_pressed)
+	male_button.pressed.connect(func(): _set_name_category(GameManager.NameCategory.MALE))
+	female_button.pressed.connect(func(): _set_name_category(GameManager.NameCategory.FEMALE))
+	neutral_button.pressed.connect(func(): _set_name_category(GameManager.NameCategory.NEUTRAL))
+	
+	# Generate initial random name
+	_on_reroll_pressed()
 	
 	# Set initial background to world intro
 	_update_state(NarrativeState.WORLD_INTRO)
 
+	
 func _update_state(new_state):
 	current_state = new_state
 	
@@ -95,7 +115,7 @@ func _update_state(new_state):
 		NarrativeState.TAVERN_INTERIOR:
 			background_image.texture = load(tavern_int)
 			tavern_keeper.visible = true
-			tavern_keeper.position = Vector2(190, 370)  # Center of the room in front of bar
+			#tavern_keeper.position = Vector2(190, 370)  # Center of the room in front of bar
 			dialog_index = 0
 			_show_tavern_keeper_dialog()
 			
@@ -109,8 +129,8 @@ func _update_state(new_state):
 			_show_simple_dialog("Dorin", "Well met, " + character_name + "! Welcome to the start of your heroic journey. Let's get you settled in and ready for adventure!")
 			
 			# Short wait before moving to the Tutorial Question
-			await get_tree().create_timer(5.0).timeout
-			_update_state(NarrativeState.TUTORIAL_OPTION) # Move the the Tutorial question
+			#await get_tree().create_timer(5.0).timeout
+			#_update_state(NarrativeState.TUTORIAL_OPTION) # Move the the Tutorial question
 		
 		NarrativeState.TUTORIAL_OPTION:
 			# Show choice dialog
@@ -143,27 +163,49 @@ func _show_choice_dialog(character_name: String, text: String, choices: Array):
 	dialog_character_name.text = character_name
 	dialog_text.text = text
 	
-	# Create choice buttons
-	var choice_container = VBoxContainer.new()
-	choice_container.name = "ChoiceContainer"
-	dialog_box.add_child(choice_container)
+	# Get References
+	var choice_scroll: ScrollContainer = $DialogContainer/DialogFrame/DialogContent/ChoiceScrollContainer
+	var choice_container: VBoxContainer = $DialogContainer/DialogFrame/DialogContent/ChoiceScrollContainer/ChoiceContainer
+
+	# Make sure it's visible
+	choice_scroll.visible = true
 	
-	# Position below the text
-	choice_container.position = Vector2(
-		dialog_box.size.x / 2 - 100,
-		dialog_box.size.y - 150
-	)
-	choice_container.custom_minimum_size = Vector2(200,100)
+	# Clear any existing choices
+	for child in choice_container.get_children():
+		child.queue_free()
 	
 	# Add buttons for each choice
 	for i in range(choices.size()):
 		var button = Button.new()
 		button.text = choices[i]
-		button.custom_minimum_size = Vector2(200,40)
+		button.custom_minimum_size = Vector2(0, 50)  # Taller for better touch area
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.focus_mode = Control.FOCUS_ALL  # Ensure it can be focused
+		button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND  # Show hand cursor
+		
+		# Add some styling
+		var normal_style = StyleBoxFlat.new()
+		normal_style.bg_color = Color(0.2, 0.2, 0.2, 0.6)
+		normal_style.border_width_bottom = 2
+		normal_style.border_color = Color(0.7, 0.7, 0.7, 0.8)
+		normal_style.corner_radius_top_left = 4
+		normal_style.corner_radius_top_right = 4
+		normal_style.corner_radius_bottom_left = 4
+		normal_style.corner_radius_bottom_right = 4
+		button.add_theme_stylebox_override("normal", normal_style)
+		
 		choice_container.add_child(button)
 		
-		# Connect button signals
-		button.connect("pressed", Callable(self, "_on_choice_selected").bind(i))
+		# Connect button signals - use lambda function to debug clicks
+		button.pressed.connect(func(): print("Button %d pressed" % i))
+		button.pressed.connect(_on_choice_selected.bind(i))
+	
+	# Set the Dialog node mouse to pass through so buttons can be pressed
+	dialog_text.mouse_filter = MOUSE_FILTER_IGNORE
+	
+	# Ensure the container has appropriate size
+	choice_container.custom_minimum_size = Vector2(300, choices.size() * 60)
+	choice_scroll.custom_minimum_size = Vector2(300, min(choices.size() * 60, 180))
 		
 # Handle choice selection
 func _on_choice_selected(choice_index: int):
@@ -201,9 +243,9 @@ func _show_name_input():
 	# Show the name input container
 	name_input_container.visible = true
 	
-	# Focus the name input
-	name_input.grab_focus()
-	
+	# Generate an initial random name
+	_on_reroll_pressed()
+		
 func _on_dialog_box_gui_input(event):
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		#_create_tap_feedback(event.position) #TODO: Possibly remove, including func
@@ -245,7 +287,12 @@ func _on_next_button_pressed():
 			
 		NarrativeState.WELCOME:
 			# Complete the introduction and navigate to the tavern hub
-			_complete_character_creation()
+			_update_state(NarrativeState.TUTORIAL_OPTION)
+			pass
+			
+		NarrativeState.TUTORIAL_OPTION:
+			#Present the tutorial choice to the player
+			pass
 
 func _on_confirm_name_pressed():
 	var character_name = name_input.text.strip_edges()
@@ -267,7 +314,8 @@ func _on_confirm_name_pressed():
 			var success = DataManager.save_character(character)
 			if success:
 				if get_node_or_null("/root/UIManager"):
-					UIManager.show_toast("Character created successfully!", "success")
+					pass
+					#UIManager.show_toast("Character created successfully!", "success")
 				
 				# Move to the welcome state
 				_update_state(NarrativeState.WELCOME)
@@ -277,6 +325,19 @@ func _on_confirm_name_pressed():
 	else:
 		if get_node_or_null("/root/UIManager"):
 			UIManager.show_toast("Failed to create character: ProfileManager not found.", "error")
+
+func _set_name_category(category):
+	current_name_category = category
+	_on_reroll_pressed()
+	
+	# Visual feedback for selected category
+	male_button.disabled = (category == GameManager.NameCategory.MALE)
+	female_button.disabled = (category == GameManager.NameCategory.FEMALE)
+	neutral_button.disabled = (category == GameManager.NameCategory.NEUTRAL)
+
+func _on_reroll_pressed():
+	# Get a random name based on the selected category
+	name_input.text = GameManager.get_random_name(current_name_category)
 
 func _complete_character_creation():
 	# Navigate to the tavern hub using the navigation system

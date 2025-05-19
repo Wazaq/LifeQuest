@@ -58,3 +58,69 @@ func change_scene(scene_path: String):
 	get_tree().change_scene_to_file(scene_path)
 	emit_signal("scene_changed", old_scene, current_scene)
 	print("GameManager: Changed scene from %s to %s" % [old_scene, current_scene])
+	
+# Name collections
+var male_names = [
+	"Alaric", "Bram", "Cedric", "Darian", "Elric", "Finn", "Gareth", 
+	"Hadrian", "Ivan", "Jasper", "Kell", "Leif", "Magnus", "Nolan",
+	"Orion", "Percy", "Quentin", "Rowan", "Silas", "Thorne", "Ulric",
+	"Vaughn", "Wren", "Xavier", "Yorath", "Zephyr"
+]
+
+var female_names = [
+	"Aria", "Brielle", "Cora", "Dahlia", "Elara", "Freya", "Gwendolyn",
+	"Harlow", "Iris", "Juniper", "Kira", "Luna", "Maeve", "Nova",
+	"Ophelia", "Piper", "Quinn", "Rhiannon", "Sage", "Thea", "Uma",
+	"Violet", "Willow", "Xanthe", "Yara", "Zora"
+]
+
+var neutral_names = [
+	"Ash", "Avery", "Blair", "Cameron", "Dakota", "Eden", "Finley",
+	"Gray", "Harper", "Jordan", "Kai", "Logan", "Morgan", "Nico",
+	"Oak", "Parker", "Quinn", "Reese", "Sage", "Taylor", "Unity",
+	"Val", "Winter", "Xen", "Yael", "Zen"
+]
+
+enum NameCategory {
+	MALE,
+	FEMALE,
+	NEUTRAL,
+	ANY  # For completely random selection across all categories
+}
+
+# Function to get a random name
+func get_random_name(category: int = NameCategory.ANY) -> String:
+	var chosen_list
+	
+	match category:
+		NameCategory.MALE:
+			chosen_list = male_names
+		NameCategory.FEMALE:
+			chosen_list = female_names
+		NameCategory.NEUTRAL:
+			chosen_list = neutral_names
+		NameCategory.ANY:
+			# Pick a random category first
+			var all_lists = [male_names, female_names, neutral_names]
+			chosen_list = all_lists[randi() % all_lists.size()]
+	
+	# Return a random name from the chosen list
+	return chosen_list[randi() % chosen_list.size()]
+
+# Function to get all names in a category (for custom selection UI if needed later)
+func get_all_names(category: int) -> Array:
+	match category:
+		NameCategory.MALE:
+			return male_names.duplicate()
+		NameCategory.FEMALE:
+			return female_names.duplicate()
+		NameCategory.NEUTRAL:
+			return neutral_names.duplicate()
+		NameCategory.ANY:
+			var all_names = []
+			all_names.append_array(male_names)
+			all_names.append_array(female_names)
+			all_names.append_array(neutral_names)
+			return all_names
+	
+	return []

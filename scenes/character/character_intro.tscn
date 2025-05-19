@@ -1,8 +1,8 @@
 [gd_scene load_steps=7 format=3 uid="uid://bb6k5bsc2l1vc"]
 
 [ext_resource type="Script" uid="uid://c2nxjus0h2u51" path="res://scripts/ui/character_intro.gd" id="1_qt6lo"]
-[ext_resource type="PackedScene" uid="uid://v8l1el1yvy1y" path="res://scenes/ui/background_texture.tscn" id="2_12175"]
 [ext_resource type="Texture2D" uid="uid://dx5sip2bkixf3" path="res://assets/sprites/Tavern_external.png" id="2_keolk"]
+[ext_resource type="Texture2D" uid="uid://o66uvvtv67ox" path="res://assets/ui/frames/scene_background_1.png" id="2_ryxw5"]
 [ext_resource type="Texture2D" uid="uid://b1fr6i4ffmpi8" path="res://assets/sprites/Bartender_transparent.png" id="3_keolk"]
 [ext_resource type="Texture2D" uid="uid://db01pl4v4bwlm" path="res://assets/ui/frames/dialog_frame_transparent.png" id="4_keolk"]
 [ext_resource type="Texture2D" uid="uid://bsf21aa7ro82r" path="res://assets/sprites/Tavern_Interior.png" id="4_qn1q4"]
@@ -24,14 +24,23 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="BackgroundTexture" parent="BackgroundContainer" instance=ExtResource("2_12175")]
+[node name="Wallpaper" type="TextureRect" parent="BackgroundContainer"]
 layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_ryxw5")
+expand_mode = 1
 
 [node name="BackgroundImage" type="TextureRect" parent="BackgroundContainer"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -75.0
+offset_bottom = -75.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_keolk")
@@ -39,10 +48,13 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="debug_tavernInteral" type="TextureRect" parent="BackgroundContainer"]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -75.0
+offset_bottom = -75.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("4_qn1q4")
@@ -57,14 +69,24 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TavernKeeper" type="Sprite2D" parent="CharacterContainer"]
-position = Vector2(190, 370)
+[node name="TavernKeeper" type="TextureRect" parent="CharacterContainer"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 189.0
+offset_top = 259.0
+offset_right = 853.0
+offset_bottom = 643.0
+grow_horizontal = 2
+grow_vertical = 2
 scale = Vector2(0.1, 0.1)
 texture = ExtResource("3_keolk")
 
 [node name="DialogContainer" type="Control" parent="."]
 layout_mode = 1
-anchors_preset = 15
+anchor_top = 0.55
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -72,18 +94,18 @@ grow_vertical = 2
 
 [node name="DialogFrame" type="NinePatchRect" parent="DialogContainer"]
 layout_mode = 1
-anchors_preset = 7
+anchors_preset = -1
 anchor_left = 0.5
-anchor_top = 1.0
+anchor_top = 0.7
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -192.415
 offset_top = -199.0
 offset_right = 414.585
-offset_bottom = 143.83
+offset_bottom = 161.0
 grow_horizontal = 2
 grow_vertical = 0
-scale = Vector2(0.630601, 0.630601)
+scale = Vector2(0.635, 0.635)
 mouse_filter = 0
 texture = ExtResource("4_keolk")
 patch_margin_left = 40
@@ -105,34 +127,50 @@ custom_minimum_size = Vector2(0, 40)
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
-offset_left = 62.9916
-offset_top = -9.08423
-offset_right = -22.0084
-offset_bottom = 30.9158
+offset_left = 63.6496
+offset_top = -24.6067
+offset_right = -21.3504
+offset_bottom = 15.3933
 grow_horizontal = 2
 theme_override_colors/default_color = Color(0.901961, 0.72549, 0.392157, 1)
 theme_override_constants/line_separation = 4
 bbcode_enabled = true
 text = "[b]Narrator[/b]"
 
+[node name="ChoiceScrollContainer" type="ScrollContainer" parent="DialogContainer/DialogFrame/DialogContent"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.65
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 0
+horizontal_scroll_mode = 0
+
+[node name="ChoiceContainer" type="VBoxContainer" parent="DialogContainer/DialogFrame/DialogContent/ChoiceScrollContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 0
+
 [node name="DialogText" type="RichTextLabel" parent="DialogContainer/DialogFrame/DialogContent"]
-custom_minimum_size = Vector2(0, 125)
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -161.0
-offset_top = -30.0
-offset_right = 179.0
-offset_bottom = 46.0
+anchor_bottom = 0.6
+offset_left = -160.8
+offset_top = -78.88
+offset_right = 179.2
+offset_bottom = 97.12
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/default_color = Color(0, 0, 0, 1)
-theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
-theme_override_constants/line_separation = 4
-theme_override_font_sizes/bold_font_size = 14
+theme_override_colors/font_shadow_color = Color(0.450648, 0.450648, 0.450648, 1)
+theme_override_font_sizes/normal_font_size = 20
 bbcode_enabled = true
 text = "Welcome to the mystical realm of Questeria, a land where heroes forge their destinies through quests and adventures."
 deselect_on_focus_loss_enabled = false
@@ -160,15 +198,20 @@ text = "Tap"
 
 [node name="NameInputContainer" type="Control" parent="."]
 layout_mode = 1
-offset_left = 15.0
-offset_right = 315.0
-offset_bottom = 180.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Panel" type="Panel" parent="NameInputContainer"]
+self_modulate = Color(0, 0, 0, 1)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = 100.0
+offset_bottom = 100.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -194,17 +237,60 @@ theme_override_font_sizes/font_size = 17
 text = "My Name is...."
 horizontal_alignment = 1
 
+[node name="Category Label" type="Label" parent="NameInputContainer/Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Choose name style:"
+horizontal_alignment = 1
+
+[node name="GenderButtons" type="HBoxContainer" parent="NameInputContainer/Panel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="MaleButton" type="Button" parent="NameInputContainer/Panel/MarginContainer/VBoxContainer/GenderButtons"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Masculine fantasy names"
+text = "Heroic"
+
+[node name="FemaleButton" type="Button" parent="NameInputContainer/Panel/MarginContainer/VBoxContainer/GenderButtons"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Feminine fantasy names"
+text = "Mystical"
+
+[node name="NeutralButton" type="Button" parent="NameInputContainer/Panel/MarginContainer/VBoxContainer/GenderButtons"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Gender-neutral fantasy names"
+text = "Enigmatic"
+
 [node name="Spacer" type="Control" parent="NameInputContainer/Panel/MarginContainer/VBoxContainer"]
-visible = false
 custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
 
 [node name="NameInput" type="LineEdit" parent="NameInputContainer/Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-placeholder_text = "Enter your name"
+placeholder_text = "Placeholder"
 alignment = 1
+editable = false
+context_menu_enabled = false
+emoji_menu_enabled = false
+virtual_keyboard_enabled = false
+shortcut_keys_enabled = false
+middle_mouse_paste_enabled = false
+drag_and_drop_selection_enabled = false
+
+[node name="RerollButton" type="Button" parent="NameInputContainer/Panel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+text = "Get Different Name"
 
 [node name="ConfirmButton" type="Button" parent="NameInputContainer/Panel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-text = "That's My Name"
+text = "I'll be known as this name"
