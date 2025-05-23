@@ -23,7 +23,6 @@ var current_state = NarrativeState.WORLD_INTRO
 @onready var dialog_box = $DialogContainer/DialogFrame
 @onready var dialog_character_name: RichTextLabel = $DialogContainer/DialogFrame/DialogContent/CharacterName
 @onready var dialog_text: RichTextLabel = $DialogContainer/DialogFrame/DialogContent/DialogText
-#@onready var next_button: Button = $DialogContainer/NextButton
 @onready var name_input_container = $NameInputContainer
 @onready var name_input = $NameInputContainer/Panel/MarginContainer/VBoxContainer/NameInput
 @onready var confirm_name_button = $NameInputContainer/Panel/MarginContainer/VBoxContainer/ConfirmButton
@@ -65,13 +64,6 @@ func _ready():
 	# Pre-load textures
 	background_image.texture = load("res://assets/sprites/Tavern_external.png")
 	tavern_keeper.texture = load("res://assets/sprites/Bartender_transparent.png")
-	dialog_box.texture = load("res://assets/ui/frames/dialog_frame_transparent.png")
-	
-	# Set dialog box visible
-	dialog_box.visible = true
-	
-	# Make sure Dialog text is clickable
-	dialog_text.mouse_filter = Control.MOUSE_FILTER_STOP
 	
 	# Hide the name input initially
 	name_input_container.visible = false
@@ -80,10 +72,7 @@ func _ready():
 	tavern_keeper.visible = false
 	
 	# Connect button signals
-	dialog_box.gui_input.connect(_on_dialog_box_gui_input)
-	#next_button.pressed.connect(_on_next_button_pressed) #TODO: Possible removal
 	confirm_name_button.pressed.connect(_on_confirm_name_pressed)
-	dialog_text.gui_input.connect(_on_dialog_box_gui_input)
 	reroll_button.pressed.connect(_on_reroll_pressed)
 	male_button.pressed.connect(func(): _set_name_category(GameManager.NameCategory.MALE))
 	female_button.pressed.connect(func(): _set_name_category(GameManager.NameCategory.FEMALE))
@@ -95,204 +84,111 @@ func _ready():
 	# Set initial background to world intro
 	_update_state(NarrativeState.WORLD_INTRO)
 
-	
 func _update_state(new_state):
+	print("CharacterIntro: Updating state to ", new_state)
 	current_state = new_state
+	
+	# Disconnect any existing signal connections to avoid duplicates
+	_disconnect_all_dialog_signals()
 	
 	# Update background image based on state
 	match current_state:
 		NarrativeState.WORLD_INTRO:
-			# We'll use the tavern exterior as a placeholder for world intro for now
 			background_image.texture = load(tavern_ext)
 			tavern_keeper.visible = false
-			_show_simple_dialog("Narrator", narrative_text[current_state])
+			DialogManager.show_dialog("Narrator", narrative_text[current_state])
+			# Connect to know when dialog is complete
+			DialogManager.dialog_completed.connect(_on_intro_dialog_completed, CONNECT_ONE_SHOT)
 			
 		NarrativeState.TAVERN_EXTERIOR:
 			background_image.texture = load(tavern_ext)
 			tavern_keeper.visible = false
-			_show_simple_dialog("Narrator", narrative_text[current_state])
+			DialogManager.show_dialog("Narrator", narrative_text[current_state])
+			DialogManager.dialog_completed.connect(_on_exterior_dialog_completed, CONNECT_ONE_SHOT)
 			
 		NarrativeState.TAVERN_INTERIOR:
 			background_image.texture = load(tavern_int)
 			tavern_keeper.visible = true
-			#tavern_keeper.position = Vector2(190, 370)  # Center of the room in front of bar
-			dialog_index = 0
-			_show_tavern_keeper_dialog()
+			DialogManager.show_dialog_sequence("Dorin", tavern_keeper_dialog)
+			DialogManager.dialog_completed.connect(_on_interior_dialog_completed, CONNECT_ONE_SHOT)
 			
 		NarrativeState.CHARACTER_CREATION:
-			# Show name input when we reach this state
+			# Hide dialog and show name input
 			_show_name_input()
 			
 		NarrativeState.WELCOME:
 			# Personalized welcome message
 			var character_name = ProfileManager.get_character_name()
-			_show_simple_dialog("Dorin", "Well met, " + character_name + "! Welcome to the start of your heroic journey. Let's get you settled in and ready for adventure!")
-			
-			# Short wait before moving to the Tutorial Question
-			#await get_tree().create_timer(5.0).timeout
-			#_update_state(NarrativeState.TUTORIAL_OPTION) # Move the the Tutorial question
+			var welcome_message = "Well met, " + character_name + "! Welcome to the start of your heroic journey. Let's get you settled in and ready for adventure!"
+			DialogManager.show_dialog("Dorin", welcome_message)
+			DialogManager.dialog_completed.connect(_on_welcome_completed, CONNECT_ONE_SHOT)
 		
 		NarrativeState.TUTORIAL_OPTION:
 			# Show choice dialog
-			_show_choice_dialog("Dorin",
-			"Would you like me to show you a round the tavern?  I can give you a quick tour of how things work around here.",
+			DialogManager.show_dialog_with_choices("Dorin",
+			"Would you like me to show you around the tavern? I can give you a quick tour of how things work around here.",
 			["Yes, that would be helpful", "No thanks, I'll figure it out"])
+			DialogManager.dialog_choice_selected.connect(_on_tutorial_choice_selected, CONNECT_ONE_SHOT)
 
-func _show_simple_dialog(character_name: String, text: String):
-	# Hide the name input container
-	name_input_container.visible = false
-	
-	# Show the dialog box
-	dialog_box.visible = true
-	
-	# Set the text
-	dialog_character_name.text = character_name
-	dialog_text.text = text
-	
-	# Show the next button
-	#next_button.visible = true #TODO: Possible removal
-	
-func _show_choice_dialog(character_name: String, text: String, choices: Array):
-	# Hide the name input container
-	name_input_container.visible = false
-	
-	# Show the dialog box
-	dialog_box.visible = true
-	
-	# Set the text
-	dialog_character_name.text = character_name
-	dialog_text.text = text
-	
-	# Get References
-	var choice_scroll: ScrollContainer = $DialogContainer/DialogFrame/DialogContent/ChoiceScrollContainer
-	var choice_container: VBoxContainer = $DialogContainer/DialogFrame/DialogContent/ChoiceScrollContainer/ChoiceContainer
+# Disconnect all dialog manager signals to prevent duplicates
+func _disconnect_all_dialog_signals():
+	if DialogManager.dialog_completed.is_connected(_on_intro_dialog_completed):
+		DialogManager.dialog_completed.disconnect(_on_intro_dialog_completed)
+	if DialogManager.dialog_completed.is_connected(_on_exterior_dialog_completed):
+		DialogManager.dialog_completed.disconnect(_on_exterior_dialog_completed)
+	if DialogManager.dialog_completed.is_connected(_on_interior_dialog_completed):
+		DialogManager.dialog_completed.disconnect(_on_interior_dialog_completed)
+	if DialogManager.dialog_completed.is_connected(_on_welcome_completed):
+		DialogManager.dialog_completed.disconnect(_on_welcome_completed)
+	if DialogManager.dialog_choice_selected.is_connected(_on_tutorial_choice_selected):
+		DialogManager.dialog_choice_selected.disconnect(_on_tutorial_choice_selected)
 
-	# Make sure it's visible
-	choice_scroll.visible = true
+func _on_intro_dialog_completed():
+	print("CharacterIntro: Intro dialog completed")
+	_update_state(NarrativeState.TAVERN_EXTERIOR)
+
+func _on_exterior_dialog_completed():
+	print("CharacterIntro: Exterior dialog completed")
+	_update_state(NarrativeState.TAVERN_INTERIOR)
+
+func _on_interior_dialog_completed():
+	print("CharacterIntro: Interior dialog completed")
+	_update_state(NarrativeState.CHARACTER_CREATION)
 	
-	# Clear any existing choices
-	for child in choice_container.get_children():
-		child.queue_free()
+func _on_welcome_completed():
+	print("CharacterIntro: Welcome dialog completed")
+	_update_state(NarrativeState.TUTORIAL_OPTION)
 	
-	# Add buttons for each choice
-	for i in range(choices.size()):
-		var button = Button.new()
-		button.text = choices[i]
-		button.custom_minimum_size = Vector2(0, 50)  # Taller for better touch area
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.focus_mode = Control.FOCUS_ALL  # Ensure it can be focused
-		button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND  # Show hand cursor
-		
-		# Add some styling
-		var normal_style = StyleBoxFlat.new()
-		normal_style.bg_color = Color(0.2, 0.2, 0.2, 0.6)
-		normal_style.border_width_bottom = 2
-		normal_style.border_color = Color(0.7, 0.7, 0.7, 0.8)
-		normal_style.corner_radius_top_left = 4
-		normal_style.corner_radius_top_right = 4
-		normal_style.corner_radius_bottom_left = 4
-		normal_style.corner_radius_bottom_right = 4
-		button.add_theme_stylebox_override("normal", normal_style)
-		
-		choice_container.add_child(button)
-		
-		# Connect button signals - use lambda function to debug clicks
-		button.pressed.connect(func(): print("Button %d pressed" % i))
-		button.pressed.connect(_on_choice_selected.bind(i))
-	
-	# Set the Dialog node mouse to pass through so buttons can be pressed
-	dialog_text.mouse_filter = MOUSE_FILTER_IGNORE
-	
-	# Ensure the container has appropriate size
-	choice_container.custom_minimum_size = Vector2(300, choices.size() * 60)
-	choice_scroll.custom_minimum_size = Vector2(300, min(choices.size() * 60, 180))
-		
-# Handle choice selection
-func _on_choice_selected(choice_index: int):
-	# Remove the choice container
-	var choice_container = dialog_box.get_node_or_null("ChoiceContainer")
-	if choice_container:
-		choice_container.queue_free()
+func _on_tutorial_choice_selected(choice_index: int):
+	print("CharacterIntro: Tutorial choice selected: ", choice_index)
 	
 	if choice_index == 0:
 		# Yes - Launch tutorial
-		_show_simple_dialog("Dorin", "Excellent! Let me show you around...")
-		# After dialog completes, navigate to tutorial
-		await get_tree().create_timer(2.0).timeout
-		var main_node = get_node_or_null("/root/Main")
-		if main_node and main_node.has_method("_navigate_to"):
-			main_node._navigate_to(main_node.ScreenState.TUTORIAL)
+		DialogManager.show_dialog("Dorin", "Excellent! Let me show you around...")
+		DialogManager.dialog_completed.connect(func():
+			# After dialog completes, navigate to tutorial
+			var main_node = get_node_or_null("/root/Main")
+			if main_node and main_node.has_method("_navigate_to"):
+				main_node._navigate_to(main_node.ScreenState.TUTORIAL)
+		, CONNECT_ONE_SHOT)
 	else:
 		# No - Go to tavern hub
-		_show_simple_dialog("Dorin", "As you wish! Feel free to explore.  See you around.")
-		await get_tree().create_timer(2.0).timeout
-		_complete_character_creation()
-
-func _show_tavern_keeper_dialog():
-	# Show the current part of the tavern keeper's dialog
-	if dialog_index < tavern_keeper_dialog.size():
-		_show_simple_dialog("Dorin", tavern_keeper_dialog[dialog_index])
-	else:
-		# Move to the next state when we've shown all dialog parts
-		_update_state(NarrativeState.CHARACTER_CREATION)
+		DialogManager.show_dialog("Dorin", "As you wish! Feel free to explore. See you around.")
+		DialogManager.dialog_completed.connect(func():
+			_complete_character_creation()
+		, CONNECT_ONE_SHOT)
 
 func _show_name_input():
-	# Hide the dialog box
-	dialog_box.visible = false
+	print("CharacterIntro: Showing name input")
+	
+	# Hide the dialog UI completely
+	DialogManager.hide_dialog()
 	
 	# Show the name input container
 	name_input_container.visible = true
 	
 	# Generate an initial random name
 	_on_reroll_pressed()
-		
-func _on_dialog_box_gui_input(event):
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		#_create_tap_feedback(event.position) #TODO: Possibly remove, including func
-		_on_next_button_pressed() # Move the dialog forward
-		
-	#var tween = create_tween()
-	#tween.tween_property(dialog_box, "modulate", Color(0.9, 0.9, 0.9), 0.1)
-	#tween.tween_property(dialog_box, "modulate", Color(1, 1, 1), 0.1)
-	pass
-	
-func _create_tap_feedback(pos: Vector2):
-	# Create a simple circular feedback at tap position
-	var feedback = ColorRect.new()
-	feedback.color = Color(1, 1, 1, 0.3)
-	feedback.size = Vector2(20, 20)
-	feedback.position = pos - Vector2(10, 10)  # Center at tap position
-	feedback.pivot_offset = Vector2(10, 10)
-	dialog_box.add_child(feedback)
-	
-	# Animate and remove
-	var tween = create_tween()
-	tween.tween_property(feedback, "scale", Vector2(3, 3), 0.3)
-	tween.parallel().tween_property(feedback, "modulate:a", 0.0, 0.3)
-	await tween.finished
-	feedback.queue_free()
-
-func _on_next_button_pressed():
-	match current_state:
-		NarrativeState.WORLD_INTRO:
-			_update_state(NarrativeState.TAVERN_EXTERIOR)
-			
-		NarrativeState.TAVERN_EXTERIOR:
-			_update_state(NarrativeState.TAVERN_INTERIOR)
-			
-		NarrativeState.TAVERN_INTERIOR:
-			# Increment dialog index for multi-part dialogs
-			dialog_index += 1
-			_show_tavern_keeper_dialog()
-			
-		NarrativeState.WELCOME:
-			# Complete the introduction and navigate to the tavern hub
-			_update_state(NarrativeState.TUTORIAL_OPTION)
-			pass
-			
-		NarrativeState.TUTORIAL_OPTION:
-			#Present the tutorial choice to the player
-			pass
 
 func _on_confirm_name_pressed():
 	var character_name = name_input.text.strip_edges()
@@ -305,6 +201,9 @@ func _on_confirm_name_pressed():
 	
 	print("CharacterIntro: Creating character with name: %s" % character_name)
 	
+	# Hide name input
+	name_input_container.visible = false
+	
 	# Create the character
 	if get_node_or_null("/root/ProfileManager"):
 		var character = ProfileManager.create_character(character_name)
@@ -313,10 +212,6 @@ func _on_confirm_name_pressed():
 		if get_node_or_null("/root/DataManager"):
 			var success = DataManager.save_character(character)
 			if success:
-				if get_node_or_null("/root/UIManager"):
-					pass
-					#UIManager.show_toast("Character created successfully!", "success")
-				
 				# Move to the welcome state
 				_update_state(NarrativeState.WELCOME)
 			else:
@@ -340,6 +235,7 @@ func _on_reroll_pressed():
 	name_input.text = GameManager.get_random_name(current_name_category)
 
 func _complete_character_creation():
+	print("CharacterIntro: Completing character creation")
 	# Navigate to the tavern hub using the navigation system
 	var main_node = get_node_or_null("/root/Main")
 	if main_node and main_node.has_method("_navigate_to"):

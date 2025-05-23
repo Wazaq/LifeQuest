@@ -85,6 +85,7 @@ scale = Vector2(0.1, 0.1)
 texture = ExtResource("3_keolk")
 
 [node name="DialogContainer" type="Control" parent="."]
+visible = false
 layout_mode = 1
 anchor_top = 0.55
 anchor_right = 1.0
@@ -197,6 +198,7 @@ theme_override_font_sizes/font_size = 80
 text = "Tap"
 
 [node name="NameInputContainer" type="Control" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
