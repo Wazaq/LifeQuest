@@ -17,13 +17,6 @@ signal nav_button_pressed(screen_name)
 func _ready():
 	print("BottomNavBar: Initializing")
 	
-	# Add styling to the panel container
-	var panel_style = StyleBoxFlat.new()
-	panel_style.bg_color = Color(0.15, 0.15, 0.2, 0.95)  # Dark background with slight transparency
-	panel_style.border_width_top = 1
-	panel_style.border_color = Color(0.3, 0.3, 0.4, 0.8)  # Subtle top border
-	$PanelContainer.add_theme_stylebox_override("panel", panel_style)
-	
 	# Connect button signals
 	tavern_button.pressed.connect(func(): _on_nav_button_pressed("tavern", tavern_button))
 	quests_button.pressed.connect(func(): _on_nav_button_pressed("quest_board", quests_button))

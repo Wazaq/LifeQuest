@@ -14,9 +14,16 @@ var current_messages = []
 var current_message_index = 0
 var current_choices = []
 var dialog_ui_instance = null
+var bottom_nav_bar = null
 
 # Reference to the dialog UI scene
 var dialog_ui_scene = preload("res://scenes/ui/dialog_ui.tscn")
+
+func _find_bottom_nav_bar():
+	# Look for the bottom nav bar in the scene
+	var current_scene = get_tree().current_scene
+	bottom_nav_bar = current_scene.find_child("BottomNavBar", true, false)
+	return bottom_nav_bar != null
 
 # Sets up the dialog UI instance if needed
 func _setup_dialog_ui(container: Control = null):
@@ -44,6 +51,12 @@ func _setup_dialog_ui(container: Control = null):
 	dialog_ui_instance.modulate.a = 0.0
 	var tween = create_tween()
 	tween.tween_property(dialog_ui_instance, "modulate:a", 1.0, 0.3)
+	
+	# fade bottom nav bar out if there	
+	if _find_bottom_nav_bar():
+		# Fade out bottom nav bar
+		var nav_tween = create_tween()
+		nav_tween.tween_property(bottom_nav_bar, "modulate:a", 0.0, 0.3)
 	
 	print("DialogManager: Dialog UI setup complete")
 
@@ -249,6 +262,12 @@ func show_dialog_ui():
 func _complete_dialog():
 	print("DialogManager: Completing dialog")
 	is_dialog_active = false
+	
+	# fade bottom nav bar in  if there
+	if bottom_nav_bar and is_instance_valid(bottom_nav_bar):
+   	 # Fade nav bar back in
+		var nav_tween = create_tween()
+		nav_tween.tween_property(bottom_nav_bar, "modulate:a", 1.0, 0.3)
 	
 	# Animate dialog closing
 	if dialog_ui_instance:

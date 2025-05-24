@@ -97,7 +97,7 @@ func open_screen(screen_name: String, data = null):
 				main_node._navigate_to(main_node.ScreenState.QUEST_CREATION, data)
 			"main_menu":
 				main_node._navigate_to(main_node.ScreenState.MAIN_MENU, data)
-			"character_creation":
+			"character_creation": # TODO: May need to remove, changed onboarding
 				main_node._navigate_to(main_node.ScreenState.CHARACTER_CREATION, data)
 			"character_profile":
 				main_node._navigate_to(main_node.ScreenState.CHARACTER_PROFILE, data)
@@ -110,6 +110,7 @@ func open_screen(screen_name: String, data = null):
 		return
 		
 	# Legacy method for backward compatibility
+	# TODO: This legacy process may be OBE and can be removed
 	var screen_path = ""
 	
 	# Map screen name to scene path
@@ -122,7 +123,7 @@ func open_screen(screen_name: String, data = null):
 			screen_path = "res://scenes/quests/quest_creation.tscn"
 		"main_menu":
 			screen_path = "res://scenes/main_menu/main_menu.tscn"
-		"character_creation":
+		"character_creation":# TODO: May need to remove, changed onboarding
 			screen_path = "res://scenes/character/character_creation.tscn"
 		"character_profile":
 			screen_path = "res://scenes/character/character_profile.tscn"
@@ -162,6 +163,7 @@ func go_back():
 		return
 	
 	# Legacy method for backward compatibility
+	# TODO: This legacy process may be OBE and can be removed
 	# Find the previous screen in the container
 	if not main_container or not current_screen:
 		return

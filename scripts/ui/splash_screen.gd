@@ -11,7 +11,6 @@ func _ready():
 	
 	# We'll use a different method to get the button - directly from the scene
 	var direct_button = get_node_or_null("VBoxContainer/StartButton")
-	print("SplashScreen: Direct button reference exists: ", direct_button != null)
 	
 	# Connect signals using shorter syntax
 	if direct_button:
@@ -21,10 +20,6 @@ func _ready():
 		
 		# Connect with shorter syntax
 		direct_button.pressed.connect(_on_start_button_pressed)
-		print("SplashScreen: Button connected with shorter syntax")
-		
-		# Add a direct callback for testing
-		direct_button.pressed.connect(func(): print("DIRECT CALLBACK TRIGGERED"))
 	else:
 		push_error("SplashScreen: StartButton not found!")
 
@@ -91,6 +86,7 @@ func _on_start_button_pressed():
 		return  # Important! Return here to avoid running legacy code
 	
 	# Legacy approach (fallback) - only runs if navigation system not found
+	#TODO: This section may be OBE 88 - 122
 	print("SplashScreen: Using legacy navigation (fallback)")
 	
 	if has_character:

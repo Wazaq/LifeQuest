@@ -4,7 +4,6 @@ extends Node
 # Screen states
 enum ScreenState {
 	SPLASH,
-	CHARACTER_CREATION,
 	CHARACTER_INTRO,
 	MAIN_MENU,
 	TAVERN_HUB,
@@ -17,7 +16,7 @@ enum ScreenState {
 
 # Reference to screens container and bottom nav bar
 @onready var screens_container = $UIRoot/MainContainer/ScreensContainer
-@onready var bottom_nav_bar = $UIRoot/BottomNavBar
+@onready var bottom_nav_bar = $UIRoot/MainContainer/NavigationContainer/BottomNavBar
 @onready var notification_layer = $UIRoot/NotificationLayer
 @onready var popup_layer = $UIRoot/PopupLayer
 
@@ -71,6 +70,7 @@ func _load_initial_screen():
 				ProfileManager.update_character(character_data.to_dictionary())
 	
 	# For now, always load the splash screen first
+	# TODO: Update this section to route based on if character was created (Splash x Hub)
 	print("NavigationContainer: Loading splash screen")
 	_navigate_to(ScreenState.SPLASH)
 
@@ -114,14 +114,9 @@ func _navigate_to(screen_state, data = null):
 		ScreenState.SPLASH:
 			scene_path = "res://scenes/main_menu/splash_screen.tscn"
 			need_bottom_nav = false
-		ScreenState.CHARACTER_CREATION:
-			scene_path = "res://scenes/character/character_creation.tscn"
-			need_bottom_nav = false
 		ScreenState.CHARACTER_INTRO:
 			scene_path = "res://scenes/character/character_intro.tscn"
 			need_bottom_nav = false
-		ScreenState.MAIN_MENU:
-			scene_path = "res://scenes/main_menu/main_menu.tscn"
 		ScreenState.TAVERN_HUB:
 			scene_path = "res://scenes/main_menu/tavern_hub.tscn"
 		ScreenState.QUEST_BOARD:
@@ -134,6 +129,7 @@ func _navigate_to(screen_state, data = null):
 		ScreenState.ADVENTURES:
 			# Adventures screen not yet implemented
 			scene_path = ""
+			need_bottom_nav = false
 			if get_node_or_null("/root/UIManager"):
 				UIManager.show_toast("Adventures feature coming soon!", "info")
 			return
@@ -147,7 +143,8 @@ func _navigate_to(screen_state, data = null):
 	# Update bottom nav active button
 	if bottom_nav_bar and need_bottom_nav:
 		match screen_state:
-			ScreenState.MAIN_MENU, ScreenState.TAVERN_HUB:
+			#ScreenState.MAIN_MENU, ScreenState.TAVERN_HUB:
+			ScreenState.TAVERN_HUB:
 				bottom_nav_bar.set_active_button("tavern")
 			ScreenState.QUEST_BOARD:
 				bottom_nav_bar.set_active_button("quest_board")
