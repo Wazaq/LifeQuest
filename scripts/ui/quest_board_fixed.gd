@@ -3,15 +3,12 @@ extends Control
 
 # References to UI containers
 @onready var active_quests_container: VBoxContainer = $MarginContainer/VBoxContainer/ActiveQuestSectionBG/ActiveQuestsSection/ActiveQuestsScrollContainer/ActiveQuestsContainerNew
-@onready var available_quests_container: VBoxContainer = $MarginContainer/VBoxContainer/AvailQuestSectionBG/AvailableQuestsSection/AvailableQuestsScrollContainer/AvailableQuestsContainerNew
 @onready var active_count_label: Label = $MarginContainer/VBoxContainer/ActiveQuestSectionBG/ActiveQuestsSection/HeaderRow/CountLabel
-@onready var refresh_button: Button = $MarginContainer/VBoxContainer/AvailQuestSectionBG/AvailableQuestsSection/HeaderRow/RefreshButton
 @onready var get_new_quest_button: Button = $MarginContainer/VBoxContainer/GetNewQuestButton
 @onready var reset_cooldown_button: Button = $MarginContainer/VBoxContainer/ResetCooldownButton
 
 # Track loaded quest items
 var active_quest_items = {}
-var available_quest_items = {}
 
 # Load the quest item scene
 var quest_item_scene = preload("res://scenes/quests/quest_item_improved.tscn")
@@ -23,7 +20,6 @@ func _ready():
 	await get_tree().process_frame
 	
 	# Configure containers to expand
-	available_quests_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	active_quests_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	
 	# Set minimum height for section containers
@@ -54,11 +50,6 @@ func _ready():
 		QuestManager.quest_expired.connect(_on_quest_expired)
 	
 	# Connect UI button signals
-	if refresh_button:
-		refresh_button.pressed.connect(_on_refresh_pressed)
-	else:
-		push_error("QuestBoard: refresh_button not found")
-		
 	if get_new_quest_button:
 		get_new_quest_button.pressed.connect(_on_get_new_quest_pressed)
 	else:
@@ -75,7 +66,6 @@ func _ready():
 
 func update_quest_display():
 	update_active_quests()
-	update_available_quests()
 	update_button_visibility()
 
 func update_active_quests():
@@ -116,31 +106,6 @@ func update_active_quests():
 	await get_tree().process_frame
 	print("QuestBoard: Active container children after adding: ", active_quests_container.get_child_count())
 
-func update_available_quests():
-	# Clear existing items first
-	for item in available_quest_items.values():
-		if is_instance_valid(item):
-			item.queue_free()
-	
-	available_quest_items.clear()
-	
-	# Debug output of container
-	print("QuestBoard: AvailableQuestsContainer rect: ", available_quests_container.get_rect())
-	
-	# Get available quests
-	var available_quests = QuestManager.get_available_quests()
-	print("QuestBoard: Available quests count: ", available_quests.size())
-	
-	# Display all available quests
-	for quest_id in available_quests:
-		var quest = available_quests[quest_id]
-		print("QuestBoard: Adding quest: ", quest.title)
-		add_quest_item(quest, available_quests_container, false)
-			
-	# Debug output after adding
-	await get_tree().process_frame
-	print("QuestBoard: Container children after adding: ", available_quests_container.get_child_count())
-
 func add_quest_item(quest, container, is_active):
 	# Create a new quest item instance
 	var quest_item = quest_item_scene.instantiate()
@@ -164,11 +129,8 @@ func add_quest_item(quest, container, is_active):
 	print("QuestBoard: Quest item global position: " + str(quest_item.global_position))
 	print("QuestBoard: Quest item size: " + str(quest_item.size))
 	
-	# Store reference
-	if is_active:
-		active_quest_items[quest.id] = quest_item
-	else:
-		available_quest_items[quest.id] = quest_item
+	# Store reference for active quests onlye
+	active_quest_items[quest.id] = quest_item
 
 func _on_quest_selected(quest_id):
 	# Open the quest details screen for the selected quest
@@ -176,18 +138,6 @@ func _on_quest_selected(quest_id):
 		UIManager.open_screen("quest_details", {"quest_id": quest_id})
 	else:
 		print("QuestBoard: UIManager not found, can't open quest details")
-
-func _on_refresh_pressed():
-	print("QuestBoard: Refresh button pressed")
-	
-	# In the full implementation, this would show an ad and refresh quests
-	if get_node_or_null("/root/QuestManager"):
-		print("QuestBoard: Refresh button If block reached")
-		QuestManager.refresh_available_quests()
-		update_available_quests()
-		
-		if get_node_or_null("/root/UIManager"):
-			UIManager.show_toast("Refreshed available quests", "info")
 
 func _on_get_new_quest_pressed():
 	# In the full implementation, this would request a new quest
@@ -238,15 +188,18 @@ func _on_quest_expired(_quest_id):
 	update_quest_display()
 
 func update_button_visibility():
-	# Update Get New Quest button with quest count
+	# Update Get New Quest button with quest pool count
 	if get_node_or_null("/root/QuestManager"):
 		var active_count = QuestManager.active_quests.size()
 		var max_count = QuestManager.max_active_quests
-		var available_count = QuestManager.get_available_quest_count()
+		var pool_count = QuestManager.get_available_quest_count()
 		
 		if get_new_quest_button:
-			# Update button text to include available count
-			get_new_quest_button.text = "Get New Quest (%d available)" % available_count
+			# Update button text to include pool count
+			get_new_quest_button.text = "Get New Quest (%d in pool)" % pool_count
 			
 			# Hide the button if we've reached the max active quests
 			get_new_quest_button.visible = active_count < max_count
+		
+		if reset_cooldown_button:
+			reset_cooldown_button.visible = true # TODO: Add feature flag here later

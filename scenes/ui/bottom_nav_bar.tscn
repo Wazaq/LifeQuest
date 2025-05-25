@@ -52,6 +52,7 @@ size_flags_vertical = 4
 text = "Character"
 
 [node name="AdventuresButton" type="Button" parent="PanelContainer/HBoxContainer"]
+visible = false
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 size_flags_horizontal = 3

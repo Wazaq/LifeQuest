@@ -93,5 +93,4 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="BottomNavBar" parent="." instance=ExtResource("3_o8kkw")]
-visible = false
 layout_mode = 1

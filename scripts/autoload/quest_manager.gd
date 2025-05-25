@@ -38,8 +38,8 @@ var completed_quests = {}  # Completed quests with timestamps by ID
 var failed_quests = []  # Failed quests with timestamps
 
 # Quest configuration
-var max_active_quests = 3  # Maximum number of active quests allowed
-var available_quest_count = 5  # Number of quests available at once
+var max_active_quests = 10  # Maximum number of active quests allowed
+var available_quest_count = 10  # Number of quests available at once
 var last_refresh_time = 0  # Unix timestamp of last quest refresh
 
 signal quest_created(quest)
