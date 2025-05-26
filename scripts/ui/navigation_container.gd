@@ -120,7 +120,7 @@ func _navigate_to(screen_state, data = null):
 		ScreenState.TAVERN_HUB:
 			scene_path = "res://scenes/main_menu/tavern_hub.tscn"
 		ScreenState.QUEST_BOARD:
-			scene_path = "res://scenes/quests/quest_board_new.tscn"
+			scene_path = "res://scenes/quests/quest_board.tscn"
 		ScreenState.CHARACTER_PROFILE:
 			scene_path = "res://scenes/character/character_profile.tscn"
 		ScreenState.QUEST_DETAILS:
