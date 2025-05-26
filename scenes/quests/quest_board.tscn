@@ -34,11 +34,9 @@ layout_mode = 2
 
 [node name="StreakLabel" type="Label" parent="MainContainer/VBoxContainer/HeaderSection/HBoxContainer"]
 layout_mode = 2
-text = "🔥 Streak: 3 days "
 
 [node name="DailyQuestLabel" type="Label" parent="MainContainer/VBoxContainer/HeaderSection/HBoxContainer"]
 layout_mode = 2
-text = "Today: 2/3 quests"
 
 [node name="ActiveQuestSection" type="VBoxContainer" parent="MainContainer/VBoxContainer"]
 layout_mode = 2

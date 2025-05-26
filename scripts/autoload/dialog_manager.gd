@@ -20,7 +20,14 @@ var bottom_nav_bar = null
 var dialog_ui_scene = preload("res://scenes/ui/dialog_ui.tscn")
 
 func _find_bottom_nav_bar():
-	# Look for the bottom nav bar in the scene
+	# Look for the bottom nav bar in the navigation container
+	var main_node = get_node_or_null("/root/Main")
+	if main_node:
+		bottom_nav_bar = main_node.get_node_or_null("UIRoot/MainContainer/NavigationContainer/BottomNavBar")
+		if bottom_nav_bar:
+			return true
+	
+	# Fallback: search in current scene tree (for backward compatibility)
 	var current_scene = get_tree().current_scene
 	bottom_nav_bar = current_scene.find_child("BottomNavBar", true, false)
 	return bottom_nav_bar != null

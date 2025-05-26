@@ -1,6 +1,7 @@
 extends Control
 
 # Header Elements
+@onready var header_container: HBoxContainer = $MainContainer/VBoxContainer/HeaderSection/HBoxContainer
 @onready var streak_label: Label = $MainContainer/VBoxContainer/HeaderSection/HBoxContainer/StreakLabel
 @onready var daily_quest_label: Label = $MainContainer/VBoxContainer/HeaderSection/HBoxContainer/DailyQuestLabel
 
@@ -40,6 +41,7 @@ func _on_quest_started(quest_id):
 	print("QuestBoard: Quest started signal received for: ", quest_id)
 	update_quest_display()
 
+@warning_ignore("unused_parameter")
 func _on_quest_completed(quest_id, rewards):
 	print("QuestBoard: Quest completed signal received for: ", quest_id)
 	#update_quest_display()
@@ -105,14 +107,22 @@ func update_quest_display():
 	
 func update_header_info():
 	# Update steak info (get from profile manager)
+	var streakFire = preload("res://assets/icons/ui/streak.png")
 	var streak: int = 0 # Default
 	if get_node_or_null("/root/ProfileManger"):
-		streak = ProfileManager.current_character.get("streak" , 0)
+		streak = ProfileManager.current_character.get("streak" , 0)	
 	
-	streak_label.text = "🔥 Streak: %d days" % streak
-	
-	# Update daily quest info (placeholder for now)
-	daily_quest_label.text = "Today: 2/3 quests"
+	if not header_container.get_node_or_null("StreakIcon"):
+		var fire_image = TextureRect.new()
+		fire_image.texture = streakFire
+		fire_image.name = "StreakIcon"
+		fire_image.custom_minimum_size = Vector2(10,10)
+		header_container.add_child(fire_image)
+		header_container.move_child(fire_image, 0)
+	# Current streak for the player	
+	streak_label.text = " Streak: %d days" % streak	
+	# TODO: Future feature, where the player can set their own dialy quest goal
+	#daily_quest_label.text = "Today: 2/3 quests"
 	
 func update_active_quests():
 	# Get active quests from QuestManager
@@ -157,6 +167,10 @@ func update_button_states():
 
 func create_quest_card(quest):
 	#print("QuestBoard: Creating quest card for: ", quest.title)
+	# Load Icons needed and prep
+	var lightning_icon = load("res://assets/icons/ui/thunder_quick_quest_complete.png")
+	var xp_icon = load("res://assets/icons/ui/xp.png")
+	var timer_icon = load("res://assets/icons/ui/time.png")
 	
 	# Create a panel for the quest card (like your test cards)
 	var quest_card = Panel.new()
@@ -184,7 +198,14 @@ func create_quest_card(quest):
 	
 	# Create quick complete button (floating in top-right)
 	var quick_complete_button = Button.new()
-	quick_complete_button.text = "⚡"
+	quick_complete_button.text = ""
+	# Load and set the lightning bolt icon
+	if lightning_icon:
+		quick_complete_button.icon = lightning_icon
+		# Optional: Scale the icon if needed
+		quick_complete_button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	else:
+		quick_complete_button.text = "QC"  # Fallback to emoji if icon fails to load
 	quick_complete_button.custom_minimum_size = Vector2(40, 40)
 	quick_complete_button.anchor_left = 1.0
 	quick_complete_button.anchor_top = 0.0
@@ -229,11 +250,35 @@ func create_quest_card(quest):
 	content_container.add_child(title_label)
 	
 	# Add quest reward info
-	var reward_label = Label.new()
-	reward_label.text = "⚡ %d XP • ⏳ %s" % [quest.xp_reward, get_time_remaining_text(quest)]
-	reward_label.add_theme_font_size_override("font_size", 14)  # Slightly bigger
-	reward_label.add_theme_color_override("font_color", Color(0.5, 0.4, 0.2, 1.0))  # Medium brown
-	content_container.add_child(reward_label)
+	# Create a horizontal container for the reward info
+	var reward_container = HBoxContainer.new()
+	content_container.add_child(reward_container)
+
+	# XP section
+	if xp_icon:
+		var xp_image = TextureRect.new()
+		xp_image.texture = xp_icon
+		xp_image.custom_minimum_size = Vector2(16, 16)  # Small icon size
+		reward_container.add_child(xp_image)
+
+	var xp_label = Label.new()
+	xp_label.text = " %d XP • " % quest.xp_reward
+	xp_label.add_theme_font_size_override("font_size", 14)
+	xp_label.add_theme_color_override("font_color", Color(0.5, 0.4, 0.2, 1.0))
+	reward_container.add_child(xp_label)
+
+	# Time section  
+	if timer_icon:
+		var time_image = TextureRect.new()
+		time_image.texture = timer_icon
+		time_image.custom_minimum_size = Vector2(16, 16)
+		reward_container.add_child(time_image)
+
+	var time_label = Label.new()
+	time_label.text = " %s" % get_time_remaining_text(quest)
+	time_label.add_theme_font_size_override("font_size", 14)
+	time_label.add_theme_color_override("font_color", Color(0.5, 0.4, 0.2, 1.0))
+	reward_container.add_child(time_label)
 	
 	# Add the card to the quest list
 	quest_list.add_child(quest_card)
@@ -257,6 +302,7 @@ func get_time_remaining_text(quest) -> String:
 			return "Expired!"
 		
 		var hours = int(time_left / 3600)
+		@warning_ignore("integer_division")
 		var days = int(hours / 24)
 		
 		if days > 0:
@@ -350,6 +396,7 @@ func show_quest_completion_celebration(quest, rewards):
 		# Fallback if card not found
 		_show_completion_toast(quest, rewards)
 
+@warning_ignore("unused_parameter")
 func _show_completion_toast(quest, rewards):
 	if get_node_or_null("/root/UIManager"):
 		UIManager.show_toast("Quest Completed! +%d XP!" % rewards.xp, "success")
@@ -490,6 +537,7 @@ func _animate_celebration_burst(quest_card, quest, rewards):
 	tween.finished.connect(func(): _finish_completion(quest, rewards))
 
 # Helper function to finish the completion process
+@warning_ignore("unused_parameter")
 func _finish_completion(quest, rewards):
 	if get_node_or_null("/root/UIManager"):
 		UIManager.show_toast("Quest Completed! +%d XP!" % rewards.xp, "success")

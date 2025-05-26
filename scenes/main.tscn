@@ -58,6 +58,7 @@ layout_mode = 2
 mouse_filter = 2
 
 [node name="BottomNavBar" parent="UIRoot/MainContainer/NavigationContainer" instance=ExtResource("3_jyhfs")]
+visible = false
 layout_mode = 1
 offset_top = 0.0
 
