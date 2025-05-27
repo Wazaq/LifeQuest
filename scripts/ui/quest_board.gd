@@ -23,6 +23,10 @@ var active_quest_cards = {}
 func _ready() -> void:
 	print("QuestBoard: Initializing Quest Board")
 	
+	# Hide debug buttons based on category
+	if not GameManager.is_debug_enabled(GameManager.DebugCategory.QUEST_SYSTEM):
+		reset_cooldown_button.visible = false
+	
 	# Wait a frame for everything to be properly setup
 	await get_tree().process_frame
 	

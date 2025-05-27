@@ -1,78 +1,144 @@
-[gd_scene load_steps=2 format=3 uid="uid://drdobpo4kcl7b"]
+[gd_scene load_steps=3 format=3 uid="uid://drdobpo4kcl7b"]
 
 [ext_resource type="Script" uid="uid://kw2uks7tcfv8" path="res://scripts/ui/quest_details.gd" id="1_628yn"]
 
-[node name="QuestDetails" type="Control"]
-layout_mode = 3
-anchors_preset = 0
-script = ExtResource("1_628yn")
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dvumx"]
+bg_color = Color(0.960784, 0.94902, 0.909804, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.545098, 0.270588, 0.0745098, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
-layout_mode = 0
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_628yn")
 
-[node name="HeaderSection" type="VBoxContainer" parent="VBoxContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="."]
+custom_minimum_size = Vector2(400, 500)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -55.0
+offset_right = 20.0
+offset_bottom = 55.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 90
+
+[node name="QuestCardBackground" type="Panel" parent="MarginContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_dvumx")
+
+[node name="ContentContainer" type="VBoxContainer" parent="MarginContainer/QuestCardBackground"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 15
+
+[node name="ContentPadding" type="MarginContainer" parent="MarginContainer/QuestCardBackground/ContentContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 25
+theme_override_constants/margin_top = 25
+theme_override_constants/margin_right = 25
+theme_override_constants/margin_bottom = 25
+
+[node name="QuestSections" type="VBoxContainer" parent="MarginContainer/QuestCardBackground/ContentContainer/ContentPadding"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="QuestHeader" type="VBoxContainer" parent="MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections"]
 layout_mode = 2
 
-[node name="QuestNameLabel" type="Label" parent="VBoxContainer/HeaderSection"]
+[node name="QuestTitle" type="Label" parent="MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/QuestHeader"]
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-text = "Quest Name"
+theme_override_colors/font_color = Color(0.239216, 0.160784, 0.0784314, 1)
+theme_override_font_sizes/font_size = 21
+text = "Quest Title"
+horizontal_alignment = 1
+autowrap_mode = 3
 
-[node name="QuestIcon" type="TextureRect" parent="VBoxContainer/HeaderSection"]
-layout_mode = 2
-
-[node name="TimeLabel" type="Label" parent="VBoxContainer/HeaderSection"]
-layout_mode = 2
-text = "Expires in 3 days"
-
-[node name="DescriptionSection" type="VBoxContainer" parent="VBoxContainer"]
+[node name="QuestDetails" type="VBoxContainer" parent="MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections"]
 layout_mode = 2
 
-[node name="DescriptionLabel" type="Label" parent="VBoxContainer/DescriptionSection"]
+[node name="QuestDescription" type="Label" parent="MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/QuestDetails"]
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-text = "Quest description goes here..."
+theme_override_colors/font_color = Color(0.239216, 0.160784, 0.0784314, 1)
+theme_override_font_sizes/font_size = 16
+text = "Quest Description"
+autowrap_mode = 3
 
-[node name="InfoSection" type="VBoxContainer" parent="VBoxContainer"]
+[node name="DifficultyInfo" type="Label" parent="MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/QuestDetails"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.239216, 0.160784, 0.0784314, 1)
+theme_override_font_sizes/font_size = 16
+text = "Difficulty"
 
-[node name="DifficultyRow" type="HBoxContainer" parent="VBoxContainer/InfoSection"]
+[node name="RewardInfo" type="Label" parent="MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/QuestDetails"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.239216, 0.160784, 0.0784314, 1)
+theme_override_font_sizes/font_size = 16
+text = "Reward"
 
-[node name="Label" type="Label" parent="VBoxContainer/InfoSection/DifficultyRow"]
+[node name="TimeInfo" type="Label" parent="MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/QuestDetails"]
 layout_mode = 2
-text = "Difficulty:"
+theme_override_colors/font_color = Color(0.239216, 0.160784, 0.0784314, 1)
+theme_override_font_sizes/font_size = 16
+text = "Time"
 
-[node name="ValueLabel" type="Label" parent="VBoxContainer/InfoSection/DifficultyRow"]
+[node name="CategoryInfo" type="Label" parent="MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/QuestDetails"]
 layout_mode = 2
-text = "Intermediate"
+theme_override_colors/font_color = Color(0.239216, 0.160784, 0.0784314, 1)
+theme_override_font_sizes/font_size = 16
+text = "Category"
 
-[node name="XPRow" type="HBoxContainer" parent="VBoxContainer/InfoSection"]
+[node name="ActionButtons" type="HBoxContainer" parent="MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections"]
 layout_mode = 2
+theme_override_constants/separation = 18
+alignment = 1
 
-[node name="Label" type="Label" parent="VBoxContainer/InfoSection/XPRow"]
+[node name="CompleteButton" type="Button" parent="MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/ActionButtons"]
+custom_minimum_size = Vector2(80, 50)
 layout_mode = 2
-text = "XP Reward:"
+text = "Complete"
 
-[node name="ValueLabel" type="Label" parent="VBoxContainer/InfoSection/XPRow"]
+[node name="AbandonButton" type="Button" parent="MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/ActionButtons"]
+custom_minimum_size = Vector2(80, 50)
 layout_mode = 2
-text = "3 XP"
+text = "Abandon"
 
-[node name="CategoriesRow" type="HBoxContainer" parent="VBoxContainer/InfoSection"]
-layout_mode = 2
+[node name="ConfirmationDialog" type="ConfirmationDialog" parent="MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/ActionButtons/AbandonButton"]
+title = "Abandon Quest?"
+initial_position = 1
+size = Vector2i(300, 150)
+min_size = Vector2i(300, 150)
+ok_button_text = "Yes, Abandon"
+dialog_text = "Are you sure you wish to abandon this quest? Your progress will be lost."
+dialog_autowrap = true
+cancel_button_text = "No, Continue"
 
-[node name="Label" type="Label" parent="VBoxContainer/InfoSection/CategoriesRow"]
-layout_mode = 2
-text = "Categories:"
-
-[node name="ValueLabel" type="Label" parent="VBoxContainer/InfoSection/CategoriesRow"]
-layout_mode = 2
-text = "Routine, Home"
-
-[node name="ActionButton" type="Button" parent="VBoxContainer"]
-layout_mode = 2
-text = "Accept Quest"
-
-[node name="BackButton" type="Button" parent="VBoxContainer"]
+[node name="BackButton" type="Button" parent="MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/ActionButtons"]
+custom_minimum_size = Vector2(80, 50)
 layout_mode = 2
 text = "Back"

@@ -1,6 +1,12 @@
 extends Node
 ## GameManager: Central coordinator for game state and core functionality
 
+# Debug config
+enum DebugCategory {
+	QUEST_SYSTEM,
+	GAME_STATE,
+	UI_TESTING,
+}
 # Feature flag configurations
 var enabled_features = {
 	"quest_system": true,
@@ -23,6 +29,17 @@ signal feature_enabled(feature_name)
 signal feature_disabled(feature_name)
 signal game_initialized
 signal scene_changed(old_scene, new_scene)
+
+func is_debug_enabled(_category: DebugCategory = DebugCategory.QUEST_SYSTEM) -> bool:
+	# For now, single flag controls everything
+	return true
+	#return false
+	
+	# Future expansion could look like:
+	# match category:
+	#     DebugCategory.QUEST_SYSTEM: return quest_debug_enabled
+	#     DebugCategory.GAME_STATE: return game_state_debug_enabled
+	#     # etc.
 
 func _ready():
 	print("GameManager: Initializing game systems...")

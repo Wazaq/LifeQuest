@@ -6,6 +6,9 @@ extends Control
 func _ready():
 	print("MoreScreen: Ready")
 	
+	if not GameManager.is_debug_enabled(GameManager.DebugCategory.GAME_STATE):
+		reset_button.visible = false
+	
 	# Add margin to container
 	var margin_container = $MarginContainer
 	margin_container.add_theme_constant_override("margin_left", 20)

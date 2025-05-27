@@ -2,31 +2,42 @@ extends Control
 ## QuestDetails: Screen showing detailed information about a quest
 
 # UI References
-@onready var quest_name_label = $MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/QuestHeader/QuestTitle
-@onready var time_label = $MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/QuestDetails/TimeInfo
-@onready var description_label = $MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/QuestDetails/QuestDescription
-@onready var difficulty_label = $MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/QuestDetails/DifficultyInfo
-@onready var xp_reward_label = $MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/QuestDetails/RewardInfo
-@onready var categories_label = $MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/QuestDetails/CategoryInfo
-@onready var action_button = $MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/ActionButtons/CompleteButton
-@onready var back_button = $MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/ActionButtons/BackButton
-@onready var abandon_button: Button = $MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/ActionButtons/AbandonButton
-@onready var abandon_confirmation_dialog: ConfirmationDialog = $MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/ActionButtons/AbandonButton/ConfirmationDialog
+@onready var quest_name_label = $VBoxContainer/HeaderSection/QuestNameLabel
+@onready var quest_icon = $VBoxContainer/HeaderSection/QuestIcon
+@onready var time_label = $VBoxContainer/HeaderSection/TimeLabel
+@onready var description_label = $VBoxContainer/DescriptionSection/DescriptionLabel
+@onready var difficulty_label = $VBoxContainer/InfoSection/DifficultyRow/ValueLabel
+@onready var xp_reward_label = $VBoxContainer/InfoSection/XPRow/ValueLabel
+@onready var categories_label = $VBoxContainer/InfoSection/CategoriesRow/ValueLabel
+@onready var action_button = $VBoxContainer/ActionButton
+@onready var back_button = $VBoxContainer/BackButton
 
 var current_quest_id = ""
 var is_active = false
 var current_quest = null
+var abandon_confirmation_dialog = null
 
 func _ready():
 	# Connect signals
 	action_button.connect("pressed", Callable(self, "_on_action_button_pressed"))
 	back_button.connect("pressed", Callable(self, "_on_back_button_pressed"))
-	abandon_button.connect("pressed", Callable(self, "_on_abandon_button_pressed"))
 	
-	# Confirm Dialog signal
-	abandon_confirmation_dialog.confirmed.connect(_confirm_abandon_quest)
-	abandon_confirmation_dialog.canceled.connect(abandon_cancelled)
+	# Create abandon confirmation dialog
+	_create_abandon_confirmation_dialog()
 
+func _create_abandon_confirmation_dialog():
+	abandon_confirmation_dialog = ConfirmationDialog.new()
+	abandon_confirmation_dialog.title = "Abandon Quest?"
+	abandon_confirmation_dialog.dialog_text = "Are you sure you wish to abandon this quest? Your progress will be lost."
+	abandon_confirmation_dialog.ok_button_text = "Yes, Abandon"
+	abandon_confirmation_dialog.cancel_button_text = "No, Continue"
+	abandon_confirmation_dialog.min_size = Vector2(300, 150)
+	
+	# Connect confirm signal
+	abandon_confirmation_dialog.confirmed.connect(_confirm_abandon_quest)
+	
+	# Add to the scene
+	add_child(abandon_confirmation_dialog)
 
 func initialize(data):
 	if not data or not data.has("quest_id"):
@@ -64,7 +75,11 @@ func _setup_active_quest():
 	difficulty_label.text = QuestManager.get_difficulty_name(current_quest.difficulty)
 	xp_reward_label.text = str(current_quest.xp_reward) + " Experience"
 	categories_label.text = current_quest.category
-		
+	
+	# Set icon if available
+	if current_quest.icon_path and ResourceLoader.exists(current_quest.icon_path):
+		quest_icon.texture = load(current_quest.icon_path)
+	
 	# Set action button
 	action_button.text = "Complete Quest"
 	
@@ -73,6 +88,26 @@ func _setup_active_quest():
 		action_button.text = "Mark Progress (%d/%d)" % [current_quest.current_progress, current_quest.total_steps]
 		if current_quest.current_progress >= current_quest.total_steps:
 			action_button.text = "Complete Epic Task"
+	
+	# Add abandon quest button
+	var parent = action_button.get_parent()
+	if parent:
+		# Check if we already have an abandon button
+		var existing_abandon = parent.get_node_or_null("AbandonButton")
+		if not existing_abandon:
+			var abandon_button = Button.new()
+			abandon_button.name = "AbandonButton"
+			abandon_button.text = "Abandon Quest"
+			abandon_button.custom_minimum_size = Vector2(action_button.custom_minimum_size.x, action_button.custom_minimum_size.y)
+			abandon_button.connect("pressed", Callable(self, "_on_abandon_button_pressed"))
+			
+			# Add it before the back button
+			var back_idx = parent.get_children().find(back_button)
+			if back_idx >= 0:
+				parent.add_child(abandon_button)
+				parent.move_child(abandon_button, back_idx)
+			else:
+				parent.add_child(abandon_button)
 
 func _setup_available_quest():
 	# Set UI elements for an available quest
@@ -88,6 +123,10 @@ func _setup_available_quest():
 	difficulty_label.text = QuestManager.get_difficulty_name(current_quest.difficulty)
 	xp_reward_label.text = str(current_quest.xp_reward) + " Experience"
 	categories_label.text = current_quest.category
+	
+	# Set icon if available
+	if current_quest.icon_path and ResourceLoader.exists(current_quest.icon_path):
+		quest_icon.texture = load(current_quest.icon_path)
 	
 	# Set action button
 	action_button.text = "Accept Quest"
@@ -119,11 +158,8 @@ func _on_back_button_pressed():
 
 # Convert seconds to a fantasy-themed time description
 func _format_fantasy_duration(seconds: int) -> String:
-	@warning_ignore("integer_division")
 	var minutes = seconds / 60
-	@warning_ignore("integer_division")
 	var hours = minutes / 60
-	@warning_ignore("integer_division")
 	var days = hours / 24
 	
 	if days > 0:
@@ -159,7 +195,6 @@ func _get_fantasy_time_remaining(quest) -> String:
 		return "The sands have run out!"
 	
 	var hours = int(time_left / 3600)
-	@warning_ignore("integer_division")
 	var days = int(hours / 24)
 	
 	if days > 0:
@@ -184,11 +219,8 @@ func _get_fantasy_time_remaining(quest) -> String:
 # Handle abandon button press
 func _on_abandon_button_pressed():
 	# Show confirmation dialog
-	abandon_confirmation_dialog.visible = true	
-
-# Cancelling and closing the dialog box	
-func abandon_cancelled(): abandon_confirmation_dialog.visible = false
-
+	if abandon_confirmation_dialog:
+		abandon_confirmation_dialog.popup_centered()
 
 # Execute quest abandonment after confirmation
 func _confirm_abandon_quest():
