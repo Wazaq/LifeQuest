@@ -1,131 +1,239 @@
-[gd_scene load_steps=2 format=3 uid="uid://cslpk1jxwc58a"]
+[gd_scene load_steps=10 format=3 uid="uid://cslpk1jxwc58a"]
 
 [ext_resource type="Script" uid="uid://chda652gn4h76" path="res://scripts/ui/character_profile.gd" id="1_w8gsv"]
+[ext_resource type="Texture2D" uid="uid://ifkwodvh6c14" path="res://assets/icons/ui/race.png" id="2_j0pbs"]
+[ext_resource type="Texture2D" uid="uid://dj1fpnqjrf03i" path="res://assets/icons/ui/sword.png" id="3_l8xay"]
+[ext_resource type="Texture2D" uid="uid://bj1dek6cqaja0" path="res://assets/icons/ui/open-book.png" id="4_ov7r5"]
+[ext_resource type="Texture2D" uid="uid://ddlx3qdmrv0pl" path="res://assets/icons/ui/magic-ball.png" id="5_4akcc"]
+[ext_resource type="Texture2D" uid="uid://c2c5mqg7gxli2" path="res://assets/icons/ui/running.png" id="6_rkidi"]
+[ext_resource type="Texture2D" uid="uid://c0wik4gbyy625" path="res://assets/icons/ui/heart.png" id="7_2juh7"]
+[ext_resource type="Texture2D" uid="uid://bsf2gt6qxk1js" path="res://assets/icons/ui/chat.png" id="8_vttbb"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w8gsv"]
+bg_color = Color(0.960784, 0.94902, 0.909804, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.545098, 0.270588, 0.0745098, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [node name="CharacterProfile" type="Control"]
 layout_mode = 3
-anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_w8gsv")
 
-[node name="ProfilePanel" type="Panel" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 90
+
+[node name="CharacterCard" type="Panel" parent="MarginContainer"]
+modulate = Color(0.961, 0.949, 0.91, 1)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_w8gsv")
+
+[node name="ContentContainer" type="VBoxContainer" parent="MarginContainer/CharacterCard"]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-size_flags_horizontal = 3
-size_flags_vertical = 3
 
-[node name="MarginContainer" type="MarginContainer" parent="ProfilePanel"]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="MainVBox" type="VBoxContainer" parent="ProfilePanel/MarginContainer"]
+[node name="ContentPadding" type="MarginContainer" parent="MarginContainer/CharacterCard/ContentContainer"]
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
+theme_override_constants/margin_left = 25
+theme_override_constants/margin_top = 25
+theme_override_constants/margin_right = 25
+theme_override_constants/margin_bottom = 25
 
-[node name="HeaderSection" type="VBoxContainer" parent="ProfilePanel/MarginContainer/MainVBox"]
+[node name="ProfileSections" type="VBoxContainer" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="CharacterHeader" type="HBoxContainer" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections"]
 layout_mode = 2
 
-[node name="TitleLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/HeaderSection"]
+[node name="CharacterPortrait" type="TextureRect" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/CharacterHeader"]
+modulate = Color(0.8, 0.7, 0.6, 1)
+custom_minimum_size = Vector2(80, 80)
 layout_mode = 2
-text = "Character Saga"
+texture = ExtResource("2_j0pbs")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="CharacterInfo" type="HBoxContainer" parent="ProfilePanel/MarginContainer/MainVBox/HeaderSection"]
-layout_mode = 2
-
-[node name="AvatarRect" type="TextureRect" parent="ProfilePanel/MarginContainer/MainVBox/HeaderSection/CharacterInfo"]
-custom_minimum_size = Vector2(100, 100)
-layout_mode = 2
-
-[node name="DetailsVBox" type="VBoxContainer" parent="ProfilePanel/MarginContainer/MainVBox/HeaderSection/CharacterInfo"]
+[node name="CharacterInfo" type="VBoxContainer" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/CharacterHeader"]
 layout_mode = 2
 
-[node name="CharacterNameLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/HeaderSection/CharacterInfo/DetailsVBox"]
+[node name="CharacterName" type="Label" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/CharacterHeader/CharacterInfo"]
+modulate = Color(0.545, 0.271, 0.075, 1)
 layout_mode = 2
-text = "Hero Name"
+theme_override_colors/font_color = Color(0.545098, 0.270588, 0.0745098, 1)
+theme_override_font_sizes/font_size = 24
+text = "Brave Adventurer"
 
-[node name="LevelLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/HeaderSection/CharacterInfo/DetailsVBox"]
+[node name="CharacterLevel" type="Label" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/CharacterHeader/CharacterInfo"]
+modulate = Color(0.545, 0.271, 0.075, 1)
 layout_mode = 2
-text = "Adventurer Rank: 1"
+text = "Adventurer Rank: 5"
 
-[node name="XPProgressLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/HeaderSection/CharacterInfo/DetailsVBox"]
+[node name="CharacterXP" type="Label" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/CharacterHeader/CharacterInfo"]
+modulate = Color(0.545, 0.271, 0.075, 1)
 layout_mode = 2
-text = "Experience: 0/100"
+text = "Experience: 1,250 XP"
 
-[node name="XPBar" type="ProgressBar" parent="ProfilePanel/MarginContainer/MainVBox/HeaderSection/CharacterInfo/DetailsVBox"]
-layout_mode = 2
-
-[node name="StatsSection" type="VBoxContainer" parent="ProfilePanel/MarginContainer/MainVBox"]
-layout_mode = 2
-
-[node name="StatsSectionTitle" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/StatsSection"]
-layout_mode = 2
-text = "Hero Attributes"
-
-[node name="StatsGrid" type="GridContainer" parent="ProfilePanel/MarginContainer/MainVBox/StatsSection"]
-layout_mode = 2
-columns = 2
-
-[node name="StrengthLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/StatsSection/StatsGrid"]
-layout_mode = 2
-text = "Might: 1"
-
-[node name="IntelligenceLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/StatsSection/StatsGrid"]
-layout_mode = 2
-text = "Intellect: 1"
-
-[node name="WisdomLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/StatsSection/StatsGrid"]
-layout_mode = 2
-text = "Wisdom: 1"
-
-[node name="DexterityLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/StatsSection/StatsGrid"]
-layout_mode = 2
-text = "Agility: 1"
-
-[node name="ConstitutionLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/StatsSection/StatsGrid"]
-layout_mode = 2
-text = "Endurance: 1"
-
-[node name="CharismaLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/StatsSection/StatsGrid"]
-layout_mode = 2
-text = "Charm: 1"
-
-[node name="QuestStatsSection" type="VBoxContainer" parent="ProfilePanel/MarginContainer/MainVBox"]
+[node name="StatsSection" type="VBoxContainer" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections"]
 layout_mode = 2
 
-[node name="QuestStatsSectionTitle" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/QuestStatsSection"]
+[node name="StatsTitle" type="Label" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection"]
+modulate = Color(0.545, 0.271, 0.075, 1)
 layout_mode = 2
-text = "Quest Chronicles"
+theme_override_colors/font_color = Color(0.545098, 0.270588, 0.0745098, 1)
+theme_override_font_sizes/font_size = 18
+text = "Character Attributes"
 
-[node name="QuestStatsGrid" type="GridContainer" parent="ProfilePanel/MarginContainer/MainVBox/QuestStatsSection"]
+[node name="StatsGrid" type="GridContainer" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection"]
 layout_mode = 2
-columns = 2
+theme_override_constants/h_separation = 15
+theme_override_constants/v_separation = 10
+columns = 3
 
-[node name="QuestsCompletedLabelTitle" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/QuestStatsSection/QuestStatsGrid"]
+[node name="MightStat" type="HBoxContainer" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid"]
 layout_mode = 2
-text = "Quests Completed:"
 
-[node name="QuestsCompletedLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/QuestStatsSection/QuestStatsGrid"]
+[node name="MightIcon" type="TextureRect" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid/MightStat"]
+custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
-text = "0"
+texture = ExtResource("3_l8xay")
+stretch_mode = 5
 
-[node name="StreakLabelTitle" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/QuestStatsSection/QuestStatsGrid"]
+[node name="MightValue" type="Label" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid/MightStat"]
+modulate = Color(0.545, 0.271, 0.075, 1)
 layout_mode = 2
-text = "Hero's Streak:"
+text = "12"
 
-[node name="StreakLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/QuestStatsSection/QuestStatsGrid"]
+[node name="IntellectStat" type="HBoxContainer" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid"]
 layout_mode = 2
-text = "0 days"
 
-[node name="ButtonsSection" type="HBoxContainer" parent="ProfilePanel/MarginContainer/MainVBox"]
-visible = false
+[node name="IntellectIcon" type="TextureRect" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid/IntellectStat"]
+custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
-alignment = 1
+texture = ExtResource("4_ov7r5")
+stretch_mode = 5
 
-[node name="BackButton" type="Button" parent="ProfilePanel/MarginContainer/MainVBox/ButtonsSection"]
-custom_minimum_size = Vector2(200, 60)
+[node name="IntellectValue" type="Label" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid/IntellectStat"]
+modulate = Color(0.545, 0.271, 0.075, 1)
 layout_mode = 2
-text = "Return to Village"
+text = "15"
+
+[node name="WisdomStat" type="HBoxContainer" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid"]
+layout_mode = 2
+
+[node name="WisdomIcon" type="TextureRect" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid/WisdomStat"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("5_4akcc")
+stretch_mode = 5
+
+[node name="WisdomValue" type="Label" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid/WisdomStat"]
+modulate = Color(0.545, 0.271, 0.075, 1)
+layout_mode = 2
+text = "10"
+
+[node name="AgilityStat" type="HBoxContainer" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid"]
+layout_mode = 2
+
+[node name="AgilityIcon" type="TextureRect" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid/AgilityStat"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("6_rkidi")
+stretch_mode = 5
+
+[node name="AgilityValue" type="Label" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid/AgilityStat"]
+modulate = Color(0.545, 0.271, 0.075, 1)
+layout_mode = 2
+text = "14"
+
+[node name="EnduranceStat" type="HBoxContainer" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid"]
+layout_mode = 2
+
+[node name="EnduranceIcon" type="TextureRect" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid/EnduranceStat"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("7_2juh7")
+stretch_mode = 5
+
+[node name="EnduranceValue" type="Label" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid/EnduranceStat"]
+modulate = Color(0.545, 0.271, 0.075, 1)
+layout_mode = 2
+text = "11"
+
+[node name="CharmStat" type="HBoxContainer" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid"]
+layout_mode = 2
+
+[node name="CharmIcon" type="TextureRect" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid/CharmStat"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("8_vttbb")
+stretch_mode = 5
+
+[node name="CharmValue" type="Label" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid/CharmStat"]
+modulate = Color(0.545, 0.271, 0.075, 1)
+layout_mode = 2
+text = "13"
+
+[node name="ProgressSection" type="VBoxContainer" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections"]
+layout_mode = 2
+
+[node name="ProgressTitle" type="Label" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ProgressSection"]
+modulate = Color(0.545, 0.271, 0.075, 1)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.545098, 0.270588, 0.0745098, 1)
+theme_override_font_sizes/font_size = 18
+text = "Adventure Progress"
+
+[node name="QuestStatsContainer" type="VBoxContainer" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ProgressSection"]
+layout_mode = 2
+
+[node name="QuestsCompleted" type="Label" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ProgressSection/QuestStatsContainer"]
+modulate = Color(0.545, 0.271, 0.075, 1)
+layout_mode = 2
+text = "Quests Completed: 47"
+
+[node name="CurrentStreak" type="Label" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ProgressSection/QuestStatsContainer"]
+modulate = Color(0.545, 0.271, 0.075, 1)
+layout_mode = 2
+text = "Current Streak: 12 sun cycles"
+autowrap_mode = 3
+
+[node name="TotalXP" type="Label" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ProgressSection/QuestStatsContainer"]
+modulate = Color(0.545, 0.271, 0.075, 1)
+layout_mode = 2
+text = "Total Experience Earned: 3,847 XP"
+
+[node name="ActionsSection" type="VBoxContainer" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections"]
+layout_mode = 2
+
+[node name="ActionButtons" type="HBoxContainer" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ActionsSection"]
+layout_mode = 2
+
+[node name="EquipmentButton" type="Button" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ActionsSection/ActionButtons"]
+custom_minimum_size = Vector2(120, 50)
+layout_mode = 2
+text = "Equipment"
+
+[node name="InventoryButton" type="Button" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ActionsSection/ActionButtons"]
+custom_minimum_size = Vector2(120, 50)
+layout_mode = 2
+text = "Inventory"

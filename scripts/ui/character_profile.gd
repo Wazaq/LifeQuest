@@ -1,33 +1,35 @@
 extends Control
 ## CharacterProfile: Displays character information, stats, and progression
 
-# UI References
-@onready var character_name_label = $ProfilePanel/MarginContainer/MainVBox/HeaderSection/CharacterInfo/DetailsVBox/CharacterNameLabel
-@onready var level_label = $ProfilePanel/MarginContainer/MainVBox/HeaderSection/CharacterInfo/DetailsVBox/LevelLabel
-@onready var xp_progress_label = $ProfilePanel/MarginContainer/MainVBox/HeaderSection/CharacterInfo/DetailsVBox/XPProgressLabel
-@onready var xp_bar = $ProfilePanel/MarginContainer/MainVBox/HeaderSection/CharacterInfo/DetailsVBox/XPBar
-@onready var avatar_rect = $ProfilePanel/MarginContainer/MainVBox/HeaderSection/CharacterInfo/AvatarRect
+# UI References - Updated for new scene structure
+@onready var character_name_label = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/CharacterHeader/CharacterInfo/CharacterName
+@onready var level_label = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/CharacterHeader/CharacterInfo/CharacterLevel
+@onready var xp_label = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/CharacterHeader/CharacterInfo/CharacterXP
+@onready var character_portrait = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/CharacterHeader/CharacterPortrait
 
-# Stats Labels
-@onready var strength_label = $ProfilePanel/MarginContainer/MainVBox/StatsSection/StatsGrid/StrengthLabel
-@onready var intelligence_label = $ProfilePanel/MarginContainer/MainVBox/StatsSection/StatsGrid/IntelligenceLabel
-@onready var wisdom_label = $ProfilePanel/MarginContainer/MainVBox/StatsSection/StatsGrid/WisdomLabel
-@onready var dexterity_label = $ProfilePanel/MarginContainer/MainVBox/StatsSection/StatsGrid/DexterityLabel
-@onready var constitution_label = $ProfilePanel/MarginContainer/MainVBox/StatsSection/StatsGrid/ConstitutionLabel
-@onready var charisma_label = $ProfilePanel/MarginContainer/MainVBox/StatsSection/StatsGrid/CharismaLabel
+# Stats Labels - Updated for new grid structure
+@onready var might_value = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid/MightStat/MightValue
+@onready var intellect_value = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid/IntellectStat/IntellectValue
+@onready var wisdom_value = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid/WisdomStat/WisdomValue
+@onready var agility_value = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid/AgilityStat/AgilityValue
+@onready var endurance_value = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid/EnduranceStat/EnduranceValue
+@onready var charm_value = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection/StatsGrid/CharmStat/CharmValue
 
-# Quest Stats Labels
-@onready var quests_completed_label = $ProfilePanel/MarginContainer/MainVBox/QuestStatsSection/QuestStatsGrid/QuestsCompletedLabel
-@onready var streak_label = $ProfilePanel/MarginContainer/MainVBox/QuestStatsSection/QuestStatsGrid/StreakLabel
+# Progress Labels - Updated for new structure
+@onready var quests_completed_label = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ProgressSection/QuestStatsContainer/QuestsCompleted
+@onready var streak_label = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ProgressSection/QuestStatsContainer/CurrentStreak
+@onready var total_xp_label = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ProgressSection/QuestStatsContainer/TotalXP
 
-# Buttons
-@onready var back_button = $ProfilePanel/MarginContainer/MainVBox/ButtonsSection/BackButton
+# Action Buttons - Updated for new structure
+@onready var equipment_button = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ActionsSection/ActionButtons/EquipmentButton
+@onready var inventory_button = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ActionsSection/ActionButtons/InventoryButton
 
 func _ready():
 	print("CharacterProfile: Ready")
 	
-	# Connect button signals
-	back_button.connect("pressed", Callable(self, "_on_back_button_pressed"))
+	# Connect action button signals for future expansion
+	equipment_button.pressed.connect(_on_equipment_button_pressed)
+	inventory_button.pressed.connect(_on_inventory_button_pressed)
 	
 	# Update the character profile information
 	update_character_info()
@@ -39,44 +41,40 @@ func update_character_info():
 	
 	var character = ProfileManager.current_character
 	
-	# Debug output for character data structure
-	print("CharacterProfile: Character stats structure:")
-	print("CharacterProfile: Stats type: ", typeof(character.stats))
-	print("CharacterProfile: Stats keys: ", character.stats.keys())
-	
-	# Update basic character info
+	# Update basic character info with fantasy-themed language
 	character_name_label.text = character.name
-	level_label.text = "Adventurer Rank: %d" % character.level
-	xp_progress_label.text = "Experience: %d/%d" % [character.xp, character.xp_to_next_level]
+	level_label.text = "Rank: %s" % _get_character_title(character.level)
+	xp_label.text = "XP: %d" % character.xp
 	
-	# Calculate XP progress percentage
-	var xp_percent = (float(character.xp) / float(character.xp_to_next_level)) * 100.0
-	xp_bar.value = xp_percent
+	# Update character stats with fantasy names and safe access
+	might_value.text = str(get_safe_stat_value(character.stats, ProfileManager.CharacterStat.STRENGTH, 1))
+	intellect_value.text = str(get_safe_stat_value(character.stats, ProfileManager.CharacterStat.INTELLIGENCE, 1))
+	wisdom_value.text = str(get_safe_stat_value(character.stats, ProfileManager.CharacterStat.WISDOM, 1))
+	agility_value.text = str(get_safe_stat_value(character.stats, ProfileManager.CharacterStat.DEXTERITY, 1))
+	endurance_value.text = str(get_safe_stat_value(character.stats, ProfileManager.CharacterStat.CONSTITUTION, 1))
+	charm_value.text = str(get_safe_stat_value(character.stats, ProfileManager.CharacterStat.CHARISMA, 1))
 	
-	# Update character stats with safe access
-	strength_label.text = "Might: %d" % get_safe_stat_value(character.stats, 0, 1)
-	intelligence_label.text = "Intellect: %d" % get_safe_stat_value(character.stats, 1, 1)
-	wisdom_label.text = "Wisdom: %d" % get_safe_stat_value(character.stats, 2, 1)
-	dexterity_label.text = "Agility: %d" % get_safe_stat_value(character.stats, 3, 1)
-	constitution_label.text = "Endurance: %d" % get_safe_stat_value(character.stats, 4, 1)
-	charisma_label.text = "Charm: %d" % get_safe_stat_value(character.stats, 5, 1)
-	
-	# Update quest stats
+	# Update progress section with quest stats
 	if get_node_or_null("/root/QuestManager"):
-		var completed_count = 0
-		if QuestManager.completed_quests:
-			completed_count = QuestManager.completed_quests.size()
+		var completed_count = QuestManager.completed_quests.size()
+		quests_completed_label.text = "Quests Completed: %d" % completed_count
 		
-		quests_completed_label.text = str(completed_count)
-		
-		# Update streak with a fantasy-themed description
+		# Update streak with fantasy-themed description
 		var streak_days = character.streak
 		var streak_text = _get_streak_description(streak_days)
-		streak_label.text = streak_text
+		streak_label.text = "Current Streak: %s" % streak_text
+		
+		# Calculate total XP earned (character XP + completed quest XP)
+		var total_earned_xp = character.xp
+		# Add XP from level-ups (rough calculation)
+		for level in range(2, character.level + 1):
+			total_earned_xp += ProfileManager.calculate_xp_for_level(level)
+		
+		total_xp_label.text = "Total Experience Earned: %d XP" % total_earned_xp
 	
-	# Set avatar if available
-	if character.avatar and character.avatar != "" and ResourceLoader.exists(character.avatar):
-		avatar_rect.texture = load(character.avatar)
+	# Set character portrait if available
+	if character.has("avatar") and character.avatar != "" and ResourceLoader.exists(character.avatar):
+		character_portrait.texture = load(character.avatar)
 
 # Helper function to safely get stat values from dictionary
 func get_safe_stat_value(stats_dict, key, default_value = 1):
@@ -84,29 +82,53 @@ func get_safe_stat_value(stats_dict, key, default_value = 1):
 		return stats_dict[key]
 	return default_value
 
+# Get character title based on level
+func _get_character_title(level: int) -> String:
+	match level:
+		1, 2:
+			return "Peasant"
+		3, 4, 5:
+			return "Squire"
+		6, 7, 8, 9, 10:
+			return "Knight"
+		11, 12, 13, 14, 15:
+			return "Noble"
+		16, 17, 18, 19, 20:
+			return "Hero"
+		_:
+			return "Legend"
+
 # Get a fantasy-themed description for the streak count
 func _get_streak_description(days: int) -> String:
 	if days <= 0:
-		return "Awaiting your first quest"
+		return "0 sun cycles"
 	elif days == 1:
-		return "A single scroll marked"
+		return "1 sun cycle"
 	elif days <= 3:
-		return "A few scrolls marked"
+		return "%d sun cycles" % days
 	elif days <= 7:
-		return "A week's journey"
+		return "A week's journey (%d sun cycles)" % days
 	elif days <= 14:
-		return "A fortnight's tale"
+		return "A fortnight's tale (%d sun cycles)" % days
 	elif days <= 30:
-		return "A moon's cycle"
+		return "A moon's cycle (%d sun cycles)" % days
 	elif days <= 90:
-		return "A season's saga"
+		return "A season's saga (%d sun cycles)" % days
 	elif days <= 180:
-		return "Half a year's legend"
+		return "Half a year's legend (%d sun cycles)" % days
 	elif days <= 365:
-		return "Almost a year's epic"
+		return "Almost a year's epic (%d sun cycles)" % days
 	else:
-		return "An epic of legends"
+		return "An epic of legends (%d sun cycles)" % days
 
-func _on_back_button_pressed():
+# Handle Equipment button press (placeholder for future expansion)
+func _on_equipment_button_pressed():
+	print("CharacterProfile: Equipment button pressed")
 	if get_node_or_null("/root/UIManager"):
-		UIManager.go_back()
+		UIManager.show_toast("Equipment management coming soon!", "info")
+
+# Handle Inventory button press (placeholder for future expansion)
+func _on_inventory_button_pressed():
+	print("CharacterProfile: Inventory button pressed")
+	if get_node_or_null("/root/UIManager"):
+		UIManager.show_toast("Inventory system coming soon!", "info")

@@ -1,0 +1,131 @@
+[gd_scene load_steps=2 format=3 uid="uid://clouyd82d3lgd"]
+
+[ext_resource type="Script" uid="uid://chda652gn4h76" path="res://scripts/ui/character_profile.gd" id="1_0tx11"]
+
+[node name="CharacterProfile" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_0tx11")
+
+[node name="ProfilePanel" type="Panel" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="ProfilePanel"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MainVBox" type="VBoxContainer" parent="ProfilePanel/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HeaderSection" type="VBoxContainer" parent="ProfilePanel/MarginContainer/MainVBox"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/HeaderSection"]
+layout_mode = 2
+text = "Character Saga"
+
+[node name="CharacterInfo" type="HBoxContainer" parent="ProfilePanel/MarginContainer/MainVBox/HeaderSection"]
+layout_mode = 2
+
+[node name="AvatarRect" type="TextureRect" parent="ProfilePanel/MarginContainer/MainVBox/HeaderSection/CharacterInfo"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+
+[node name="DetailsVBox" type="VBoxContainer" parent="ProfilePanel/MarginContainer/MainVBox/HeaderSection/CharacterInfo"]
+layout_mode = 2
+
+[node name="CharacterNameLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/HeaderSection/CharacterInfo/DetailsVBox"]
+layout_mode = 2
+text = "Hero Name"
+
+[node name="LevelLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/HeaderSection/CharacterInfo/DetailsVBox"]
+layout_mode = 2
+text = "Adventurer Rank: 1"
+
+[node name="XPProgressLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/HeaderSection/CharacterInfo/DetailsVBox"]
+layout_mode = 2
+text = "Experience: 0/100"
+
+[node name="XPBar" type="ProgressBar" parent="ProfilePanel/MarginContainer/MainVBox/HeaderSection/CharacterInfo/DetailsVBox"]
+layout_mode = 2
+
+[node name="StatsSection" type="VBoxContainer" parent="ProfilePanel/MarginContainer/MainVBox"]
+layout_mode = 2
+
+[node name="StatsSectionTitle" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/StatsSection"]
+layout_mode = 2
+text = "Hero Attributes"
+
+[node name="StatsGrid" type="GridContainer" parent="ProfilePanel/MarginContainer/MainVBox/StatsSection"]
+layout_mode = 2
+columns = 2
+
+[node name="StrengthLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/StatsSection/StatsGrid"]
+layout_mode = 2
+text = "Might: 1"
+
+[node name="IntelligenceLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/StatsSection/StatsGrid"]
+layout_mode = 2
+text = "Intellect: 1"
+
+[node name="WisdomLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/StatsSection/StatsGrid"]
+layout_mode = 2
+text = "Wisdom: 1"
+
+[node name="DexterityLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/StatsSection/StatsGrid"]
+layout_mode = 2
+text = "Agility: 1"
+
+[node name="ConstitutionLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/StatsSection/StatsGrid"]
+layout_mode = 2
+text = "Endurance: 1"
+
+[node name="CharismaLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/StatsSection/StatsGrid"]
+layout_mode = 2
+text = "Charm: 1"
+
+[node name="QuestStatsSection" type="VBoxContainer" parent="ProfilePanel/MarginContainer/MainVBox"]
+layout_mode = 2
+
+[node name="QuestStatsSectionTitle" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/QuestStatsSection"]
+layout_mode = 2
+text = "Quest Chronicles"
+
+[node name="QuestStatsGrid" type="GridContainer" parent="ProfilePanel/MarginContainer/MainVBox/QuestStatsSection"]
+layout_mode = 2
+columns = 2
+
+[node name="QuestsCompletedLabelTitle" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/QuestStatsSection/QuestStatsGrid"]
+layout_mode = 2
+text = "Quests Completed:"
+
+[node name="QuestsCompletedLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/QuestStatsSection/QuestStatsGrid"]
+layout_mode = 2
+text = "0"
+
+[node name="StreakLabelTitle" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/QuestStatsSection/QuestStatsGrid"]
+layout_mode = 2
+text = "Hero's Streak:"
+
+[node name="StreakLabel" type="Label" parent="ProfilePanel/MarginContainer/MainVBox/QuestStatsSection/QuestStatsGrid"]
+layout_mode = 2
+text = "0 days"
+
+[node name="ButtonsSection" type="HBoxContainer" parent="ProfilePanel/MarginContainer/MainVBox"]
+visible = false
+layout_mode = 2
+alignment = 1
+
+[node name="BackButton" type="Button" parent="ProfilePanel/MarginContainer/MainVBox/ButtonsSection"]
+custom_minimum_size = Vector2(200, 60)
+layout_mode = 2
+text = "Return to Village"
