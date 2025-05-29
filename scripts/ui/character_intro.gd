@@ -163,18 +163,20 @@ func _on_tutorial_choice_selected(choice_index: int):
 	print("CharacterIntro: Tutorial choice selected: ", choice_index)
 	
 	if choice_index == 0:
-		# Yes - Launch tutorial
-		DialogManager.show_dialog("Dorin", "Excellent! Let me show you around...")
+		# Yes - Start tutorial and go to tavern hub in tutorial mode
+		DialogManager.show_dialog("Dorin", "Excellent! Let me show you around. Follow my guidance and you'll be questing like a seasoned adventurer in no time!")
 		DialogManager.dialog_completed.connect(func():
-			# After dialog completes, navigate to tutorial
-			var main_node = get_node_or_null("/root/Main")
-			if main_node and main_node.has_method("_navigate_to"):
-				main_node._navigate_to(main_node.ScreenState.TUTORIAL)
+			# Start tutorial system
+			TutorialManager.start_tutorial()
+			# Navigate directly to tavern hub (now in tutorial mode)
+			_complete_character_creation()
 		, CONNECT_ONE_SHOT)
 	else:
-		# No - Go to tavern hub
+		# No - Go to tavern hub in normal mode
 		DialogManager.show_dialog("Dorin", "As you wish! Feel free to explore. See you around.")
 		DialogManager.dialog_completed.connect(func():
+			# Skip tutorial and go to normal tavern hub
+			TutorialManager.skip_tutorial()
 			_complete_character_creation()
 		, CONNECT_ONE_SHOT)
 

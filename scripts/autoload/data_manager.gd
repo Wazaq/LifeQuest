@@ -7,6 +7,7 @@ const CHARACTER_SAVE_FILE = "character.json"
 const ACTIVE_QUESTS_SAVE_FILE = "active_quests.json"
 const COMPLETED_QUESTS_SAVE_FILE = "completed_quests.json"
 const SETTINGS_SAVE_FILE = "settings.json"
+const TUTORIAL_SAVE_FILE = "tutorial.json"
 
 # Signals
 signal data_saved(file_name)
@@ -204,6 +205,20 @@ func delete_save_file(file_name):
 # Check if save data exists for a character
 func has_character_save():
 	return FileAccess.file_exists(SAVE_DIR + CHARACTER_SAVE_FILE)
+
+# Save tutorial completion data
+func save_tutorial_data(tutorial_data):
+	var result = save_data(TUTORIAL_SAVE_FILE, tutorial_data)
+	return result
+
+# Load tutorial completion data
+func load_tutorial_data():
+	var tutorial_data = load_data(TUTORIAL_SAVE_FILE)
+	if not tutorial_data:
+		print("DataManager: No tutorial data found")
+		return {}
+	
+	return tutorial_data
 
 # Save all game data at once
 func save_all_game_data(character_data, active_quests, completed_quests, settings):

@@ -96,3 +96,37 @@ offset_bottom = 40.0
 [node name="BottomNavBar" parent="." instance=ExtResource("3_o8kkw")]
 visible = false
 layout_mode = 1
+
+[node name="TutorialOverlay" type="Control" parent="."]
+visible = false
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="DimBackground" type="ColorRect" parent="TutorialOverlay"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.7)
+
+[node name="HighlightContainer" type="Control" parent="TutorialOverlay"]
+anchors_preset = 0
+
+[node name="TutorialText" type="Label" parent="TutorialOverlay"]
+layout_mode = 0
+anchor_left = 0.1
+anchor_right = 0.1
+offset_left = 14.0
+offset_top = 100.0
+offset_right = 314.0
+offset_bottom = 300.0
+text = "Welcome to your tavern hub!"
+autowrap_mode = 3
+
+[node name="ContinueButton" type="Button" parent="TutorialOverlay"]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 320.0
+offset_right = 170.0
+offset_bottom = 370.0
+text = "Continue"

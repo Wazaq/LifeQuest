@@ -23,6 +23,7 @@ ProfileManager="*res://scripts/autoload/profile_manager.gd"
 QuestManager="*res://scripts/autoload/quest_manager.gd"
 UIManager="*res://scripts/autoload/ui_manager.gd"
 DialogManager="*res://scripts/autoload/dialog_manager.gd"
+TutorialManager="*res://scripts/autoload/tutorial_manager.gd"
 
 [display]
 
