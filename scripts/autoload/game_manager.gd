@@ -31,15 +31,13 @@ signal game_initialized
 signal scene_changed(old_scene, new_scene)
 
 func is_debug_enabled(_category: DebugCategory = DebugCategory.QUEST_SYSTEM) -> bool:
-	# For now, single flag controls everything
-	return true
-	#return false
-	
-	# Future expansion could look like:
-	# match category:
-	#     DebugCategory.QUEST_SYSTEM: return quest_debug_enabled
-	#     DebugCategory.GAME_STATE: return game_state_debug_enabled
-	#     # etc.
+	return is_debug_mode_available()
+
+func is_debug_mode_available() -> bool:
+	return get_node_or_null("/root/DebugManager") != null
+
+func get_debug_manager():
+	return get_node_or_null("/root/DebugManager")
 
 func _ready():
 	print("GameManager: Initializing game systems...")
@@ -124,7 +122,6 @@ func get_random_name(category: int = NameCategory.ANY) -> String:
 	# Return a random name from the chosen list
 	return chosen_list[randi() % chosen_list.size()]
 
-# Function to get all names in a category (for custom selection UI if needed later)
 func get_all_names(category: int) -> Array:
 	match category:
 		NameCategory.MALE:

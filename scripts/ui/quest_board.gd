@@ -19,6 +19,41 @@ const quest_item_scene = preload("res://scenes/quests/quest_item_improved.tscn")
 # track quest cards we've created
 var active_quest_cards = {}
 
+# Tutorial overlay references
+@onready var tutorial_overlay: Control = $TutorialOverlay
+@onready var tutorial_text: Label = $TutorialOverlay/TutorialText
+@onready var continue_button: Button = $TutorialOverlay/ContinueButton
+@onready var highlight_container: Control = $TutorialOverlay/HighlightContainer
+
+# Tutorial state
+var current_tutorial_step: int = 0
+var tutorial_steps = [
+	{
+		"text": "Welcome to your Quest Board! This is where you manage all your active adventures and seek out new challenges.",
+		"highlight_target": ""
+	},
+	{
+		"text": "Here you can see all your active quests with their difficulty colors, XP rewards, and time remaining.",
+		"highlight_target": "quest_list"
+	},
+	{
+		"text": "The lightning bolt buttons let you quickly complete quests when you've finished them in real life!",
+		"highlight_target": "quick_complete"
+	},
+	{
+		"text": "This button helps you seek out new adventures when you're ready for more challenges.",
+		"highlight_target": "seek_adventure"
+	},
+	{
+		"text": "Click on any quest card to see its full details, requirements, and completion options.",
+		"highlight_target": "quest_card"
+	},
+	{
+		"text": "Excellent! Now let's check your Character profile to see your progression and stats.",
+		"highlight_target": ""
+	}
+]
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	print("QuestBoard: Initializing Quest Board")
@@ -40,6 +75,9 @@ func _ready() -> void:
 	
 	# Load and display current quest data
 	update_quest_display()
+
+	# Check if we're in tutorial mode
+	_check_tutorial_mode()
 
 func _on_quest_started(quest_id):
 	print("QuestBoard: Quest started signal received for: ", quest_id)
@@ -136,16 +174,26 @@ func update_active_quests():
 	
 	var active_quests = QuestManager.active_quests
 	
+	# During tutorial, limit display to first 2 quests to avoid text overlap
+	var display_quests = active_quests
+	if TutorialManager and TutorialManager.is_tutorial_active():
+		var quest_ids = active_quests.keys()
+		if quest_ids.size() > 2:
+			display_quests = {}
+			for i in range(2):
+				var quest_id = quest_ids[i]
+				display_quests[quest_id] = active_quests[quest_id]
+	
 	# Update section title
-	var quest_count = active_quests.size()
+	var quest_count = active_quests.size()  # Show real count, not display count
 	var max_quests = QuestManager.max_active_quests
 	section_title.text = "Active Quests (%d/%d)" % [quest_count, max_quests]
 	
 	# Find which quests are actually new
-	var current_quest_ids = active_quests.keys()
+	var current_quest_ids = display_quests.keys()
 	var existing_card_ids = active_quest_cards.keys()
 	
-	# Remove cards for quests that are no longer active
+	# Remove cards for quests that are no longer active or not being displayed
 	for card_id in existing_card_ids:
 		if not card_id in current_quest_ids:
 			if is_instance_valid(active_quest_cards[card_id]):
@@ -155,7 +203,7 @@ func update_active_quests():
 	# Create cards for new quests only
 	for quest_id in current_quest_ids:
 		if not quest_id in active_quest_cards:
-			var quest = active_quests[quest_id]
+			var quest = display_quests[quest_id]
 			create_quest_card_with_unravel(quest)
 		
 func update_button_states():
@@ -546,3 +594,185 @@ func _finish_completion(quest, rewards):
 	if get_node_or_null("/root/UIManager"):
 		UIManager.show_toast("Quest Completed! +%d XP!" % rewards.xp, "success")
 	update_quest_display()
+
+# Tutorial system integration
+func _check_tutorial_mode():
+	# Check if we're in tutorial mode and on the quest board step
+	if TutorialManager and TutorialManager.is_tutorial_active():
+		var current_step = TutorialManager.get_current_step()
+		print("QuestBoard: Tutorial active, current step: ", current_step)
+		# Check if we're on the quest board tutorial step
+		if current_step == TutorialManager.TutorialStep.QUEST_BOARD_TUTORIAL:
+			_start_tutorial_overlay()
+
+func _start_tutorial_overlay():
+	print("QuestBoard: Starting tutorial overlay")
+	current_tutorial_step = 0
+	tutorial_overlay.visible = true
+	
+	# Position tutorial text in bottom third of screen
+	#tutorial_text.anchor_top = 0.7
+	#tutorial_text.anchor_bottom = 0.7
+	#tutorial_text.offset_top = 0
+	#tutorial_text.offset_bottom = 100
+	
+	# Set up proper mouse filtering for input detection
+	var dim_background = tutorial_overlay.get_node_or_null("DimBackground")
+	if dim_background:
+		dim_background.mouse_filter = Control.MOUSE_FILTER_IGNORE  # Let clicks pass through
+		# Lighten the overlay - less dark, more transparent
+		dim_background.color = Color(0, 0, 0, 0.4)  # Lighter overlay
+	
+	# Add dark background to tutorial text for better readability
+	if not tutorial_text.has_theme_stylebox_override("normal"):
+		var text_bg = StyleBoxFlat.new()
+		text_bg.bg_color = Color(0, 0, 0, 0.8)  # Dark background
+		text_bg.corner_radius_top_left = 10
+		text_bg.corner_radius_top_right = 10
+		text_bg.corner_radius_bottom_left = 10
+		text_bg.corner_radius_bottom_right = 10
+		text_bg.content_margin_left = 15
+		text_bg.content_margin_top = 15
+		text_bg.content_margin_right = 15
+		text_bg.content_margin_bottom = 15
+		tutorial_text.add_theme_stylebox_override("normal", text_bg)
+		tutorial_text.add_theme_color_override("font_color", Color.WHITE)
+	
+	# Make tutorial overlay cover nav bar area to block navigation during tutorial
+	tutorial_overlay.anchor_bottom = 1.0  # Extend to bottom of screen
+	
+	# Make sure the overlay itself can receive input
+	tutorial_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	
+	# Connect gui_input signal for the tutorial overlay
+	if not tutorial_overlay.gui_input.is_connected(_on_tutorial_overlay_clicked):
+		tutorial_overlay.gui_input.connect(_on_tutorial_overlay_clicked)
+	
+	_show_tutorial_step(current_tutorial_step)
+
+func _show_tutorial_step(step_index: int):
+	if step_index >= tutorial_steps.size():
+		print("QuestBoard: Tutorial completed, advancing to character screen")
+		_complete_tutorial()
+		return
+	
+	var step_data = tutorial_steps[step_index]
+	tutorial_text.text = step_data["text"]
+	tutorial_text.visible = true  # Make sure text is visible
+	
+	# Clear existing highlights
+	_clear_highlights()
+	
+	# Add highlight for target element
+	if step_data["highlight_target"] != "":
+		_highlight_element(step_data["highlight_target"])
+	
+	# Update button text
+	if step_index == tutorial_steps.size() - 1:
+		continue_button.text = "Continue to Character Screen"
+	else:
+		continue_button.text = "Continue"
+
+func _highlight_element(target: String):
+	var target_node = null
+	
+	match target:
+		"quest_list":
+			target_node = quest_list
+		"seek_adventure":
+			target_node = seek_adventure_button
+		"quest_card":
+			# Find first active quest card
+			if quest_list.get_child_count() > 0:
+				target_node = quest_list.get_child(0)
+		"quick_complete":
+			# Find first quick complete button in a quest card
+			if quest_list.get_child_count() > 0:
+				var first_card = quest_list.get_child(0)
+				for child in first_card.get_children():
+					if child is Button and child.icon != null:
+						target_node = child
+						break
+	
+	if target_node:
+		_create_highlight_border(target_node)
+
+func _create_highlight_border(target_node: Node):
+	if not target_node:
+		return
+	
+	# Create a styled highlight panel
+	var highlight_panel = Panel.new()
+	highlight_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	
+	# Position and size the highlight
+	var global_rect = target_node.get_global_rect()
+	var local_rect = get_global_rect()
+	
+	highlight_panel.position = global_rect.position - local_rect.position - Vector2(5, 5)
+	highlight_panel.size = global_rect.size + Vector2(10, 10)
+	
+	# Style with bright border only (no center fill)
+	var style_box = StyleBoxFlat.new()
+	style_box.bg_color = Color(1.0, 1.0, 1.0, 0.0)  # Completely transparent center
+	style_box.border_width_left = 5
+	style_box.border_width_top = 5
+	style_box.border_width_right = 5
+	style_box.border_width_bottom = 5
+	style_box.border_color = Color(1.0, 1.0, 0.0, 1.0)  # Bright yellow border
+	style_box.corner_radius_top_left = 8
+	style_box.corner_radius_top_right = 8
+	style_box.corner_radius_bottom_left = 8
+	style_box.corner_radius_bottom_right = 8
+	
+	highlight_panel.add_theme_stylebox_override("panel", style_box)
+	highlight_container.add_child(highlight_panel)
+	
+	# Add pulsing animation
+	var tween = create_tween()
+	tween.set_loops(-1)
+	tween.tween_property(highlight_panel, "modulate:a", 0.5, 1.0)
+	tween.tween_property(highlight_panel, "modulate:a", 1.0, 1.0)
+	
+	highlight_panel.set_meta("highlight_tween", tween)
+
+func _clear_highlights():
+	for child in highlight_container.get_children():
+		if child.has_meta("highlight_tween"):
+			var tween = child.get_meta("highlight_tween")
+			if tween:
+				tween.kill()
+		child.queue_free()
+
+func _on_tutorial_continue():
+	current_tutorial_step += 1
+	_show_tutorial_step(current_tutorial_step)
+
+func _on_tutorial_overlay_clicked(event):
+	# Only process mouse button clicks, ignore mouse motion
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		print("QuestBoard: Tutorial click detected, advancing to step ", current_tutorial_step + 1)
+		current_tutorial_step += 1
+		_show_tutorial_step(current_tutorial_step)
+
+func _complete_tutorial():
+	print("QuestBoard: Tutorial step completed, advancing to character screen")
+	tutorial_overlay.visible = false
+	
+	# Show navigation bar again
+	var main_node = get_node_or_null("/root/Main")
+	if main_node:
+		var nav_bar = main_node.get_node_or_null("UIRoot/MainContainer/NavigationContainer/BottomNavBar")
+		if nav_bar:
+			nav_bar.visible = true
+	
+	# Disconnect gui_input signal to clean up
+	if tutorial_overlay.gui_input.is_connected(_on_tutorial_overlay_clicked):
+		tutorial_overlay.gui_input.disconnect(_on_tutorial_overlay_clicked)
+	
+	# Tell TutorialManager to advance to character screen tutorial
+	TutorialManager.advance_to_next_tutorial_step()
+	
+	# Navigate to character screen
+	if get_node_or_null("/root/UIManager"):
+		UIManager.open_screen("character_profile")

@@ -95,8 +95,8 @@ func open_screen(screen_name: String, data = null):
 				main_node._navigate_to(main_node.ScreenState.QUEST_DETAILS, data)
 			"quest_creation":
 				main_node._navigate_to(main_node.ScreenState.QUEST_CREATION, data)
-			"main_menu":
-				main_node._navigate_to(main_node.ScreenState.MAIN_MENU, data)
+			"tavern_hub":
+				main_node._navigate_to(main_node.ScreenState.TAVERN_HUB, data)
 			"character_creation": # TODO: May need to remove, changed onboarding
 				main_node._navigate_to(main_node.ScreenState.CHARACTER_CREATION, data)
 			"character_profile":

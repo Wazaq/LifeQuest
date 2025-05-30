@@ -2,11 +2,11 @@ extends Control
 
 # Node References
 @onready var tavern_keeper: TextureRect = $TavernKeeperContainer/TavernKeeper
+@onready var bottom_nav_bar: Control = $BottomNavBar # for editor needs, hiding normally
 
 # Tutorial overlay references
 @onready var tutorial_overlay: Control = $TutorialOverlay
 @onready var tutorial_text: Label = $TutorialOverlay/TutorialText
-@onready var continue_button: Button = $TutorialOverlay/ContinueButton
 @onready var highlight_container: Control = $TutorialOverlay/HighlightContainer
 
 # Tutorial state
@@ -31,11 +31,17 @@ var tutorial_steps = [
 	{
 		"text": "Finally, the Settings button gives you access to additional options and game preferences.",
 		"highlight_target": "settings_button"
+	},
+	{
+		"text": "Perfect! Now let's explore your Quest Board to see how you manage your adventures.",
+		"highlight_target": ""
 	}
 ]
 
 func _ready() -> void:
 	print("TavernHub: Ready")
+	# The bottom nav bar is only for editor purposes, making sure it's hidden in launch
+	bottom_nav_bar.visible = false
 	_setup_ui()
 	_setup_tavern_keeper()
 	_update_welcome_message()
@@ -122,45 +128,71 @@ func _setup_time_based_keeper_greetings():
 
 # Tutorial system integration
 func _check_tutorial_mode():
-	# Check if we're in tutorial mode
+	# Check if we're in tutorial mode and on the tavern hub step
 	if TutorialManager and TutorialManager.is_tutorial_active():
-		_start_tutorial_overlay()
+		var current_step = TutorialManager.get_current_step()
+		if current_step == TutorialManager.TutorialStep.TAVERN_HUB_TUTORIAL:
+			_start_tutorial_overlay()
 
 func _start_tutorial_overlay():
 	print("TavernHub: Starting tutorial overlay")
 	current_tutorial_step = 0
 	tutorial_overlay.visible = true
-	_show_tutorial_step(current_tutorial_step)
 	
-	# Connect continue button
-	if not continue_button.pressed.is_connected(_on_tutorial_continue):
-		continue_button.pressed.connect(_on_tutorial_continue)
+	# Position tutorial text in center since nav bar is hidden
+	tutorial_text.anchor_top = 0.5
+	tutorial_text.anchor_bottom = 0.5
+	tutorial_text.offset_top = 0
+	tutorial_text.offset_bottom = 100
+	
+	# Set up proper mouse filtering for input detection
+	var dim_background = tutorial_overlay.get_node("DimBackground")
+	if dim_background:
+		dim_background.mouse_filter = Control.MOUSE_FILTER_IGNORE  # Let clicks pass through
+		dim_background.color = Color(0, 0, 0, 0.4)  # Lighter overlay
+	
+	# Add dark background to tutorial text for better readability
+	if not tutorial_text.has_theme_stylebox_override("normal"):
+		var text_bg = StyleBoxFlat.new()
+		text_bg.bg_color = Color(0, 0, 0, 0.8)  # Dark background
+		text_bg.corner_radius_top_left = 10
+		text_bg.corner_radius_top_right = 10
+		text_bg.corner_radius_bottom_left = 10
+		text_bg.corner_radius_bottom_right = 10
+		text_bg.content_margin_left = 15
+		text_bg.content_margin_top = 15
+		text_bg.content_margin_right = 15
+		text_bg.content_margin_bottom = 15
+		tutorial_text.add_theme_stylebox_override("normal", text_bg)
+		tutorial_text.add_theme_color_override("font_color", Color.WHITE)
+	
+	# Make tutorial overlay cover full screen
+	tutorial_overlay.anchor_bottom = 1.0  # Extend to bottom of screen
+	
+	# Make sure the overlay itself can receive input
+	tutorial_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	
+	# Connect gui_input signal for the tutorial overlay
+	if not tutorial_overlay.gui_input.is_connected(_on_tutorial_overlay_clicked):
+		tutorial_overlay.gui_input.connect(_on_tutorial_overlay_clicked)
+	
+	_show_tutorial_step(current_tutorial_step)
 
 func _show_tutorial_step(step_index: int):
-	print("TavernHub: Showing tutorial step ", step_index, " of ", tutorial_steps.size())
-	
 	if step_index >= tutorial_steps.size():
-		print("TavernHub: Reached end of tutorial steps, completing")
+		print("TavernHub: Tutorial completed, advancing to quest board")
 		_complete_tutorial()
 		return
 	
 	var step_data = tutorial_steps[step_index]
 	tutorial_text.text = step_data["text"]
-	print("TavernHub: Tutorial text set to: ", step_data["text"])
 	
 	# Clear existing highlights
 	_clear_highlights()
 	
 	# Add highlight for target element
 	if step_data["highlight_target"] != "":
-		print("TavernHub: Creating highlight for: ", step_data["highlight_target"])
 		_highlight_element(step_data["highlight_target"])
-	
-	# Update button text
-	if step_index == tutorial_steps.size() - 1:
-		continue_button.text = "Got it!"
-	else:
-		continue_button.text = "Continue"
 
 func _highlight_element(target: String):
 	# Find the target element and create a highlight around it
@@ -247,11 +279,24 @@ func _on_tutorial_continue():
 	current_tutorial_step += 1
 	_show_tutorial_step(current_tutorial_step)
 
+func _on_tutorial_overlay_clicked(event):
+	# Only process mouse button clicks, ignore mouse motion
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		print("TavernHub: Tutorial click detected, advancing to step ", current_tutorial_step + 1)
+		current_tutorial_step += 1
+		_show_tutorial_step(current_tutorial_step)
+
 func _complete_tutorial():
-	print("TavernHub: Tutorial completed")
+	print("TavernHub: Tavern hub tutorial completed, advancing to quest board")
 	tutorial_overlay.visible = false
-	TutorialManager.complete_tutorial()
 	
-	# Show completion message
+	# Disconnect gui_input signal to clean up
+	if tutorial_overlay.gui_input.is_connected(_on_tutorial_overlay_clicked):
+		tutorial_overlay.gui_input.disconnect(_on_tutorial_overlay_clicked)
+	
+	# Tell TutorialManager to advance to quest board tutorial
+	TutorialManager.advance_to_next_tutorial_step()
+	
+	# Navigate to quest board
 	if get_node_or_null("/root/UIManager"):
-		UIManager.show_toast("Tutorial completed! Ready for adventure!", "success")
+		UIManager.open_screen("quest_board")

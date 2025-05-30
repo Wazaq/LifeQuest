@@ -9,12 +9,10 @@ signal tutorial_completed
 
 enum TutorialStep {
 	NONE = -1,
-	WELCOME_INTRO = 0,
-	TAVERN_OVERVIEW = 1,
-	NAVIGATION_DEMO = 2,
-	QUEST_SYSTEM_INTRO = 3,
-	CHARACTER_STATS_DEMO = 4,
-	TUTORIAL_COMPLETE = 5
+	TAVERN_HUB_TUTORIAL = 0,
+	QUEST_BOARD_TUTORIAL = 1,
+	CHARACTER_PROFILE_TUTORIAL = 2,
+	TUTORIAL_COMPLETE = 3
 }
 
 # Tutorial state
@@ -25,27 +23,17 @@ var player_tutorial_preferences: Dictionary = {}
 
 # Tutorial step definitions
 var tutorial_steps = {
-	TutorialStep.WELCOME_INTRO: {
-		"title": "Welcome to Your Adventure!",
-		"description": "Learn the basics of your new home base",
-		"scene": "tavern_tutorial"
-	},
-	TutorialStep.TAVERN_OVERVIEW: {
-		"title": "The Tavern Hub",
-		"description": "Your central command for all adventures",
+	TutorialStep.TAVERN_HUB_TUTORIAL: {
+		"title": "Welcome to Your Tavern Hub!",
+		"description": "Learn about your home base and navigation",
 		"scene": "tavern_hub"
 	},
-	TutorialStep.NAVIGATION_DEMO: {
-		"title": "Navigation Basics",
-		"description": "Learn to move between different areas",
-		"scene": "tavern_hub"
-	},
-	TutorialStep.QUEST_SYSTEM_INTRO: {
+	TutorialStep.QUEST_BOARD_TUTORIAL: {
 		"title": "Quest Management",
 		"description": "Discover how to find and complete quests",
 		"scene": "quest_board"
 	},
-	TutorialStep.CHARACTER_STATS_DEMO: {
+	TutorialStep.CHARACTER_PROFILE_TUTORIAL: {
 		"title": "Character Progress",
 		"description": "Track your growth and achievements",
 		"scene": "character_profile"
@@ -60,11 +48,15 @@ func _ready():
 func start_tutorial():
 	print("Starting tutorial system")
 	tutorial_active = true
-	current_tutorial_step = TutorialStep.WELCOME_INTRO
+	current_tutorial_step = TutorialStep.TAVERN_HUB_TUTORIAL
 	tutorial_started.emit()
 
 func complete_tutorial_step():
 	print("Completing tutorial step: ", current_tutorial_step)
+	advance_to_next_tutorial_step()
+
+func advance_to_next_tutorial_step():
+	print("Advancing to next tutorial step from: ", current_tutorial_step)
 	current_tutorial_step = (current_tutorial_step + 1) as TutorialStep
 	
 	tutorial_step_completed.emit(current_tutorial_step, get_total_tutorial_steps())

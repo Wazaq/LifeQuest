@@ -24,6 +24,40 @@ extends Control
 @onready var equipment_button = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ActionsSection/ActionButtons/EquipmentButton
 @onready var inventory_button = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ActionsSection/ActionButtons/InventoryButton
 
+# Tutorial overlay references
+@onready var tutorial_overlay: Control = $TutorialOverlay
+@onready var tutorial_text: Label = $TutorialOverlay/TutorialText
+@onready var highlight_container: Control = $TutorialOverlay/HighlightContainer
+
+# Tutorial state
+var current_tutorial_step: int = 0
+var tutorial_steps = [
+	{
+		"text": "Welcome to your Character Profile! Here you can track your heroic progression and achievements.",
+		"highlight_target": ""
+	},
+	{
+		"text": "This shows your character name and current rank. As you complete quests, you'll advance from Peasant to Legend!",
+		"highlight_target": "character_info"
+	},
+	{
+		"text": "These are your character stats - Might, Intellect, Wisdom, Agility, Endurance, and Charm. They'll grow as you complete different types of quests.",
+		"highlight_target": "stats_section"
+	},
+	{
+		"text": "This progress section shows your quest completion count, your current streak, and total experience earned.",
+		"highlight_target": "progress_section"
+	},
+	{
+		"text": "These buttons will give you access to equipment and inventory management in future updates.",
+		"highlight_target": "action_buttons"
+	},
+	{
+		"text": "Congratulations! You're now ready to embark on your epic journey of personal growth and achievement. May fortune favor your quests, brave adventurer!",
+		"highlight_target": ""
+	}
+]
+
 func _ready():
 	print("CharacterProfile: Ready")
 	
@@ -33,6 +67,9 @@ func _ready():
 	
 	# Update the character profile information
 	update_character_info()
+	
+	# Check if we're in tutorial mode
+	_check_tutorial_mode()
 
 func update_character_info():
 	if not get_node_or_null("/root/ProfileManager"):
@@ -73,8 +110,14 @@ func update_character_info():
 		total_xp_label.text = "Total Experience Earned: %d XP" % total_earned_xp
 	
 	# Set character portrait if available
-	if character.has("avatar") and character.avatar != "" and ResourceLoader.exists(character.avatar):
-		character_portrait.texture = load(character.avatar)
+	if character is CharacterResource: # Tutorial Debugging Mode
+	# Resource object path
+		if character.avatar_path != "" and ResourceLoader.exists(character.avatar_path):
+			character_portrait.texture = load(character.avatar_path)
+	elif character is Dictionary: #Normal Game
+	# Dictionary path
+		if character.has("avatar") and character.avatar != "" and ResourceLoader.exists(character.avatar):
+			character_portrait.texture = load(character.avatar)
 
 # Helper function to safely get stat values from dictionary
 func get_safe_stat_value(stats_dict, key, default_value = 1):
@@ -132,3 +175,194 @@ func _on_inventory_button_pressed():
 	print("CharacterProfile: Inventory button pressed")
 	if get_node_or_null("/root/UIManager"):
 		UIManager.show_toast("Inventory system coming soon!", "info")
+
+# Tutorial system integration
+func _check_tutorial_mode():
+	# Check if we're in tutorial mode and on the character profile step
+	if TutorialManager and TutorialManager.is_tutorial_active():
+		var current_step = TutorialManager.get_current_step()
+		print("CharacterProfile: Tutorial active, current step: ", current_step)
+		# Check if we're on the character profile tutorial step
+		if current_step == TutorialManager.TutorialStep.CHARACTER_PROFILE_TUTORIAL:
+			_start_tutorial_overlay()
+	else:
+		# Check if player has never completed tutorial
+		var character = ProfileManager.current_character
+		if not TutorialManager.has_completed_tutorial():
+			print("CharacterProfile: Tutorial not completed, starting from beginning")
+			# Start tutorial from the beginning
+			TutorialManager.start_tutorial()
+			# This will navigate back to tavern hub to start tutorial flow
+
+func _start_tutorial_overlay():
+	print("CharacterProfile: Starting tutorial overlay")
+	current_tutorial_step = 0
+	tutorial_overlay.visible = true
+	
+	# Hide navigation bar during tutorial
+	var main_node = get_node_or_null("/root/Main")
+	if main_node:
+		var nav_bar = main_node.get_node_or_null("UIRoot/MainContainer/NavigationContainer/BottomNavBar")
+		if nav_bar:
+			nav_bar.visible = false
+	
+	# Position tutorial text in center since nav bar is hidden
+	tutorial_text.anchor_top = 0.6
+	tutorial_text.anchor_bottom = 0.6
+	tutorial_text.offset_top = 0
+	tutorial_text.offset_bottom = 100
+	
+	# Set up proper mouse filtering for input detection
+	var dim_background = tutorial_overlay.get_node_or_null("DimBackground")
+	if dim_background:
+		dim_background.mouse_filter = Control.MOUSE_FILTER_IGNORE  # Let clicks pass through
+		# Lighter overlay
+		dim_background.color = Color(0, 0, 0, 0.4)
+	
+	# Add dark background to tutorial text for better readability
+	if not tutorial_text.has_theme_stylebox_override("normal"):
+		var text_bg = StyleBoxFlat.new()
+		text_bg.bg_color = Color(0, 0, 0, 0.8)  # Dark background
+		text_bg.corner_radius_top_left = 10
+		text_bg.corner_radius_top_right = 10
+		text_bg.corner_radius_bottom_left = 10
+		text_bg.corner_radius_bottom_right = 10
+		text_bg.content_margin_left = 15
+		text_bg.content_margin_top = 15
+		text_bg.content_margin_right = 15
+		text_bg.content_margin_bottom = 15
+		tutorial_text.add_theme_stylebox_override("normal", text_bg)
+		tutorial_text.add_theme_color_override("font_color", Color.WHITE)
+	
+	# Make tutorial overlay cover full screen
+	tutorial_overlay.anchor_bottom = 1.0  # Extend to bottom of screen
+	
+	# Make sure the overlay itself can receive input
+	tutorial_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	
+	# Connect gui_input signal for the tutorial overlay
+	if not tutorial_overlay.gui_input.is_connected(_on_tutorial_overlay_clicked):
+		tutorial_overlay.gui_input.connect(_on_tutorial_overlay_clicked)
+	
+	_show_tutorial_step(current_tutorial_step)
+
+func _show_tutorial_step(step_index: int):
+	if step_index >= tutorial_steps.size():
+		_complete_tutorial()
+		return
+	
+	var step_data = tutorial_steps[step_index]
+	tutorial_text.text = step_data["text"]
+	tutorial_text.visible = true  # Make sure text is visible
+	
+	# For final message, move to center for better visibility
+	if step_index == tutorial_steps.size() - 1:
+		tutorial_text.anchor_top = 0.4
+		tutorial_text.anchor_bottom = 0.4
+	else:
+		tutorial_text.anchor_top = 0.7
+		tutorial_text.anchor_bottom = 0.7
+	
+	# Clear existing highlights
+	_clear_highlights()
+	
+	# Add highlight for target element
+	if step_data["highlight_target"] != "":
+		_highlight_element(step_data["highlight_target"])
+
+func _highlight_element(target: String):
+	var target_node = null
+	
+	match target:
+		"character_info":
+			target_node = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/CharacterHeader/CharacterInfo
+		"stats_section":
+			target_node = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection
+		"progress_section":
+			target_node = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ProgressSection
+		"action_buttons":
+			target_node = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ActionsSection
+	
+	if target_node:
+		_create_highlight_border(target_node)
+
+func _create_highlight_border(target_node: Node):
+	if not target_node:
+		return
+	
+	# Create a styled highlight panel
+	var highlight_panel = Panel.new()
+	highlight_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	
+	# Position and size the highlight
+	var global_rect = target_node.get_global_rect()
+	var local_rect = get_global_rect()
+	
+	highlight_panel.position = global_rect.position - local_rect.position - Vector2(5, 5)
+	highlight_panel.size = global_rect.size + Vector2(10, 10)
+	
+	# Style with bright border only (no center fill)
+	var style_box = StyleBoxFlat.new()
+	style_box.bg_color = Color(1.0, 1.0, 1.0, 0.0)  # Completely transparent center
+	style_box.border_width_left = 5
+	style_box.border_width_top = 5
+	style_box.border_width_right = 5
+	style_box.border_width_bottom = 5
+	style_box.border_color = Color(1.0, 1.0, 0.0, 1.0)  # Bright yellow border
+	style_box.corner_radius_top_left = 8
+	style_box.corner_radius_top_right = 8
+	style_box.corner_radius_bottom_left = 8
+	style_box.corner_radius_bottom_right = 8
+	
+	highlight_panel.add_theme_stylebox_override("panel", style_box)
+	highlight_container.add_child(highlight_panel)
+	
+	# Add pulsing animation
+	var tween = create_tween()
+	tween.set_loops(-1)
+	tween.tween_property(highlight_panel, "modulate:a", 0.5, 1.0)
+	tween.tween_property(highlight_panel, "modulate:a", 1.0, 1.0)
+	
+	highlight_panel.set_meta("highlight_tween", tween)
+
+func _clear_highlights():
+	for child in highlight_container.get_children():
+		if child.has_meta("highlight_tween"):
+			var tween = child.get_meta("highlight_tween")
+			if tween:
+				tween.kill()
+		child.queue_free()
+
+func _on_tutorial_overlay_clicked(event):
+	# Only process mouse button clicks, ignore mouse motion
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		print("CharacterProfile: Tutorial click detected, advancing to step ", current_tutorial_step + 1)
+		current_tutorial_step += 1
+		_show_tutorial_step(current_tutorial_step)
+
+func _complete_tutorial():
+	print("CharacterProfile: Tutorial completed, returning to tavern hub")
+	tutorial_overlay.visible = false
+	
+	# Show navigation bar again
+	var main_node = get_node_or_null("/root/Main")
+	if main_node:
+		var nav_bar = main_node.get_node_or_null("UIRoot/MainContainer/NavigationContainer/BottomNavBar")
+		if nav_bar:
+			nav_bar.visible = true
+	
+	# Disconnect gui_input signal to clean up
+	if tutorial_overlay.gui_input.is_connected(_on_tutorial_overlay_clicked):
+		tutorial_overlay.gui_input.disconnect(_on_tutorial_overlay_clicked)
+	
+	# Mark tutorial as completed in character data
+	var character = ProfileManager.current_character
+	#character["tutorial_completed"] = true
+	DataManager.save_character(character)
+	
+	# Complete the tutorial in TutorialManager
+	TutorialManager.complete_tutorial()
+	
+	# Navigate back to tavern hub for normal gameplay
+	if get_node_or_null("/root/UIManager"):
+		UIManager.open_screen("tavern_hub")

@@ -94,7 +94,6 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="BottomNavBar" parent="." instance=ExtResource("3_o8kkw")]
-visible = false
 layout_mode = 1
 
 [node name="TutorialOverlay" type="Control" parent="."]
@@ -122,11 +121,3 @@ offset_right = 314.0
 offset_bottom = 300.0
 text = "Welcome to your tavern hub!"
 autowrap_mode = 3
-
-[node name="ContinueButton" type="Button" parent="TutorialOverlay"]
-layout_mode = 0
-offset_left = 50.0
-offset_top = 320.0
-offset_right = 170.0
-offset_bottom = 370.0
-text = "Continue"
