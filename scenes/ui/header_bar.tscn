@@ -1,0 +1,53 @@
+[gd_scene load_steps=2 format=3 uid="uid://dwgs1qouv71gt"]
+
+[ext_resource type="Script" uid="uid://we1jlkhig4op" path="res://scripts/ui/header_bar.gd" id="1_8t7yt"]
+
+[node name="HeaderBar" type="Control"]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_8t7yt")
+
+[node name="Background" type="Panel" parent="."]
+modulate = Color(0.9, 0.9, 0.8, 1)
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="MainContainer" type="MarginContainer" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MainContainer"]
+layout_mode = 2
+
+[node name="LeftSection" type="VBoxContainer" parent="MainContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NameAndStreak" type="Label" parent="MainContainer/HBoxContainer/LeftSection"]
+layout_mode = 2
+
+[node name="XPLabel" type="Label" parent="MainContainer/HBoxContainer/LeftSection"]
+layout_mode = 2
+
+[node name="RankLabel" type="Label" parent="MainContainer/HBoxContainer/LeftSection"]
+layout_mode = 2
+
+[node name="RightSection" type="VBoxContainer" parent="MainContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="UrgentQuestTitle" type="Label" parent="MainContainer/HBoxContainer/RightSection"]
+layout_mode = 2
+
+[node name="UrgentQuestName" type="Label" parent="MainContainer/HBoxContainer/RightSection"]
+layout_mode = 2
+
+[node name="UrgentQuestTime" type="Label" parent="MainContainer/HBoxContainer/RightSection"]
+layout_mode = 2

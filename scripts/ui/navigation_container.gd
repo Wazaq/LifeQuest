@@ -14,9 +14,10 @@ enum ScreenState {
 	MORE
 }
 
-# Reference to screens container and bottom nav bar
+# Reference to screens container and navigation elements
 @onready var screens_container = $UIRoot/MainContainer/ScreensContainer
 @onready var bottom_nav_bar = $UIRoot/MainContainer/NavigationContainer/BottomNavBar
+@onready var header_bar = $UIRoot/MainContainer/NavigationContainer/HeaderBar
 @onready var notification_layer = $UIRoot/NotificationLayer
 @onready var popup_layer = $UIRoot/PopupLayer
 
@@ -45,9 +46,11 @@ func _ready():
 	if bottom_nav_bar:
 		bottom_nav_bar.nav_button_pressed.connect(_on_nav_button_pressed)
 	
-	# Hide bottom nav on startup (only show after character creation)
+	# Hide navigation elements on startup (only show after character creation)
 	if bottom_nav_bar:
 		bottom_nav_bar.visible = false
+	if header_bar:
+		header_bar.visible = false
 	
 	# Initialize game state
 	if get_node_or_null("/root/GameManager"):
@@ -109,6 +112,7 @@ func _navigate_to(screen_state, data = null):
 	# Determine which scene to load
 	var scene_path = ""
 	var need_bottom_nav = true
+	var need_header = false
 	
 	match screen_state:
 		ScreenState.SPLASH:
@@ -119,6 +123,7 @@ func _navigate_to(screen_state, data = null):
 			need_bottom_nav = false
 		ScreenState.TAVERN_HUB:
 			scene_path = "res://scenes/main_menu/tavern_hub.tscn"
+			need_header = true
 		ScreenState.QUEST_BOARD:
 			scene_path = "res://scenes/quests/quest_board.tscn"
 		ScreenState.CHARACTER_PROFILE:
@@ -136,9 +141,14 @@ func _navigate_to(screen_state, data = null):
 		ScreenState.MORE:
 			scene_path = "res://scenes/main_menu/more_screen.tscn"
 	
-	# Show/hide bottom navigation
+	# Show/hide navigation elements
 	if bottom_nav_bar:
 		bottom_nav_bar.visible = need_bottom_nav
+	if header_bar:
+		header_bar.visible = need_header
+		if need_header:
+			# Refresh header content when shown
+			header_bar.refresh_display()
 	
 	# Update bottom nav active button
 	if bottom_nav_bar and need_bottom_nav:
@@ -179,9 +189,18 @@ func _on_character_created():
 	# Navigate to tavern hub
 	_navigate_to(ScreenState.TAVERN_HUB)
 	
-	# Show bottom nav
+	# Show navigation elements
 	if bottom_nav_bar:
 		bottom_nav_bar.visible = true
+	if header_bar:
+		header_bar.visible = true
+		header_bar.refresh_display()
 
 func _on_game_initialized():
 	print("NavigationContainer: Game systems initialized")
+
+
+
+
+
+

@@ -610,12 +610,6 @@ func _start_tutorial_overlay():
 	current_tutorial_step = 0
 	tutorial_overlay.visible = true
 	
-	# Position tutorial text in bottom third of screen
-	#tutorial_text.anchor_top = 0.7
-	#tutorial_text.anchor_bottom = 0.7
-	#tutorial_text.offset_top = 0
-	#tutorial_text.offset_bottom = 100
-	
 	# Set up proper mouse filtering for input detection
 	var dim_background = tutorial_overlay.get_node_or_null("DimBackground")
 	if dim_background:

@@ -403,6 +403,8 @@ func add_example_quests():
 	quest1.category = "routine"
 	quest1.xp_reward = 3
 	quest1.cooldown_hours = 72  # 3 days
+	quest1.has_deadline = true
+	quest1.deadline = Time.get_unix_time_from_system() + randi_range(12, 48) * 3600  # 12-48 hours
 	quest1.icon_path = "res://assets/icons/quests/wardrobe.png"  # Will need to create this
 	create_quest(quest1)
 	
@@ -415,6 +417,8 @@ func add_example_quests():
 	quest2.category = "routine"
 	quest2.xp_reward = 5
 	quest2.cooldown_hours = 168  # 7 days
+	quest2.has_deadline = true
+	quest2.deadline = Time.get_unix_time_from_system() + randi_range(24, 72) * 3600  # 1-3 days
 	quest2.icon_path = "res://assets/icons/quests/room.png"  # Will need to create this
 	create_quest(quest2)
 	
@@ -427,6 +431,8 @@ func add_example_quests():
 	quest3.category = "learning"
 	quest3.xp_reward = 2
 	quest3.cooldown_hours = 24  # 1 day
+	quest3.has_deadline = true
+	quest3.deadline = Time.get_unix_time_from_system() + randi_range(6, 24) * 3600  # 6-24 hours
 	quest3.icon_path = "res://assets/icons/quests/book.png"  # Will need to create this
 	create_quest(quest3)
 	
@@ -439,6 +445,8 @@ func add_example_quests():
 	quest4.category = "physical"
 	quest4.xp_reward = 2
 	quest4.cooldown_hours = 24  # 1 day
+	quest4.has_deadline = true
+	quest4.deadline = Time.get_unix_time_from_system() + randi_range(8, 36) * 3600  # 8-36 hours
 	quest4.icon_path = "res://assets/icons/quests/walk.png"  # Will need to create this
 	create_quest(quest4)
 	
@@ -451,6 +459,8 @@ func add_example_quests():
 	quest5.category = "social"
 	quest5.xp_reward = 3
 	quest5.cooldown_hours = 48  # 2 days
+	quest5.has_deadline = true
+	quest5.deadline = Time.get_unix_time_from_system() + randi_range(18, 60) * 3600  # 18-60 hours
 	quest5.icon_path = "res://assets/icons/quests/social.png"  # Will need to create this
 	create_quest(quest5)
 	
