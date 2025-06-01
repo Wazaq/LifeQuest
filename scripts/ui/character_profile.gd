@@ -187,7 +187,7 @@ func _check_tutorial_mode():
 			_start_tutorial_overlay()
 	else:
 		# Check if player has never completed tutorial
-		var character = ProfileManager.current_character
+		var _character = ProfileManager.current_character
 		if not TutorialManager.has_completed_tutorial():
 			print("CharacterProfile: Tutorial not completed, starting from beginning")
 			# Start tutorial from the beginning
@@ -356,9 +356,7 @@ func _complete_tutorial():
 		tutorial_overlay.gui_input.disconnect(_on_tutorial_overlay_clicked)
 	
 	# Mark tutorial as completed in character data
-	var character = ProfileManager.current_character
-	#character["tutorial_completed"] = true
-	DataManager.save_character(character)
+	DataManager.save_character(ProfileManager.current_character)
 	
 	# Complete the tutorial in TutorialManager
 	TutorialManager.complete_tutorial()

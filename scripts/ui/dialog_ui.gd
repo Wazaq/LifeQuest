@@ -11,7 +11,7 @@ extends Control
 @onready var choice_container = $DialogFrame/DialogContent/ChoiceScrollContainer
 
 func _ready():
-	print("DialogUI: Ready")
+	#print("DialogUI: Ready")
 	
 	# Hide choice container because it shouldn't be visible at the start
 	choice_container.visible = false
@@ -29,12 +29,12 @@ func _ready():
 func _on_dialog_frame_gui_input(event):
 	# Only process left mouse button clicks
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		print("DialogUI: Left click detected")
+		#print("DialogUI: Left click detected")
 		
 		# If choice container is visible, don't advance (let buttons handle input)
 		if choice_container.visible:
-			print("DialogUI: Choices visible, not advancing")
+			#print("DialogUI: Choices visible, not advancing")
 			return
 			
-		print("DialogUI: Advancing dialog")
+		#print("DialogUI: Advancing dialog")
 		dialog_manager.advance_dialog()

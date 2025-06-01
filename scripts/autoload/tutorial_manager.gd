@@ -61,6 +61,14 @@ func advance_to_next_tutorial_step():
 	
 	tutorial_step_completed.emit(current_tutorial_step, get_total_tutorial_steps())
 	
+	# Add tutorial Quests
+	var tutorial_quest_ids = ["tutorial_completed", "first_quest"]
+	
+	for quest_id in tutorial_quest_ids:
+		if QuestManager.master_quest_list.has(quest_id):
+			# Move the quest to active quests
+			QuestManager.start_quest(quest_id)
+			
 	if current_tutorial_step >= TutorialStep.TUTORIAL_COMPLETE:
 		complete_tutorial()
 
@@ -111,6 +119,7 @@ func _save_tutorial_completion():
 	# Save through DataManager
 	if DataManager:
 		DataManager.save_tutorial_data(tutorial_completion_status)
+		DataManager.save_active_quests(QuestManager.active_quests)
 
 func _load_tutorial_data():
 	if DataManager:

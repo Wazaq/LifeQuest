@@ -7,7 +7,7 @@ const CHARACTER_SAVE_FILE = "character.json"
 const ACTIVE_QUESTS_SAVE_FILE = "active_quests.json"
 const COMPLETED_QUESTS_SAVE_FILE = "completed_quests.json"
 const SETTINGS_SAVE_FILE = "settings.json"
-const TUTORIAL_SAVE_FILE = "tutorial.json"
+const TUTORIAL_SAVE_FILE = "tutorial_state.json"
 
 # Signals
 signal data_saved(file_name)

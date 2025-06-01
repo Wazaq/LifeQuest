@@ -69,3 +69,7 @@ text = "Reset Tutorial Only"
 [node name="AddTestQuestsButton" type="Button" parent="MarginContainer/VBoxContainer/DebugSection"]
 layout_mode = 2
 text = "Add Test Quests"
+
+[node name="ClearQuestDataButton" type="Button" parent="MarginContainer/VBoxContainer/DebugSection"]
+layout_mode = 2
+text = "Clear Quest Data & Load JSON"

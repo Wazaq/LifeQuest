@@ -15,6 +15,8 @@ class_name QuestResource
 @export var total_steps: int = 1
 @export var current_progress: int = 0
 @export var state: int = 0  # Using QuestManager.QuestState enum
+@export var times_completed: int = 0
+@export var repeatable: bool = true # default to true special quests would be false
 
 # Time constraints
 @export var has_deadline: bool = false
@@ -55,7 +57,9 @@ func to_dictionary() -> Dictionary:
 		"cooldown_hours": cooldown_hours,
 		"xp_reward": xp_reward,
 		"stat_rewards": stat_rewards,
-		"item_rewards": item_rewards
+		"item_rewards": item_rewards,
+		"times_completed": times_completed,
+		"repeatable": repeatable
 	}
 
 # Initialize the quest from a dictionary
@@ -81,6 +85,8 @@ func from_dictionary(data: Dictionary):
 	xp_reward = data.get("xp_reward", 10)
 	stat_rewards = data.get("stat_rewards", {})
 	item_rewards = data.get("item_rewards", [])
+	times_completed = data.get("times_completed", 0)
+	repeatable = data.get("repeatable", true)
 
 # Calculate XP reward based on difficulty and steps
 func calculate_xp_reward() -> int:

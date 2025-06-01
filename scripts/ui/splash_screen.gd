@@ -85,42 +85,10 @@ func _on_start_button_pressed():
 			main_node._navigate_to(main_node.ScreenState.CHARACTER_INTRO)
 		return  # Important! Return here to avoid running legacy code
 	
-	# Legacy approach (fallback) - only runs if navigation system not found
-	#TODO: This section may be OBE 88 - 122
-	print("SplashScreen: Using legacy navigation (fallback)")
-	
-	if has_character:
-		# Load the main menu scene
-		var main_menu = load("res://scenes/main_menu/main_menu.tscn").instantiate()
-		
-		# Find the screens container
-		var screens_container = find_screens_container()
-		
-		if screens_container:
-			# Add the main menu to the container
-			screens_container.add_child(main_menu)
-			
-			if get_node_or_null("/root/UIManager"):
-				UIManager.show_toast("Navigating to Main Menu", "info")
-				UIManager.change_screen(main_menu)
-		else:
-			push_error("SplashScreen: Could not find screens container")
-	else:
-		# Load the character creation scene
-		var character_creation = load("res://scenes/character/character_creation.tscn").instantiate()
-		
-		# Find the screens container
-		var screens_container = find_screens_container()
-		
-		if screens_container:
-			# Change to the character creation screen
-			screens_container.add_child(character_creation)
-			
-			if get_node_or_null("/root/UIManager"):
-				UIManager.change_screen(character_creation)
-		else:
-			push_error("SplashScreen: Could not find screens container")
+	# Navigation system not found - this should not happen in production
+	push_error("SplashScreen: Navigation system not available!")
 	
 	# Queue self for removal after transition
 	await get_tree().create_timer(0.5).timeout
 	queue_free()
+

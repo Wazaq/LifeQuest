@@ -145,6 +145,35 @@ func add_test_quests():
 	
 	debug_action_completed.emit("add_test_quests")
 
+func clear_quest_data():
+	"""Clear all saved quest data to force fresh JSON loading"""
+	print("DebugManager: Clearing all quest data")
+	
+	if QuestManager:
+		# Clear all quest dictionaries
+		#QuestManager.all_quests.clear()
+		QuestManager.active_quests.clear()
+		QuestManager.available_quests.clear()
+		QuestManager.completed_quests.clear()
+		QuestManager.failed_quests.clear()
+		
+		# Remove the saved quests file
+		if DataManager:
+			var quest_file = "user://quests.json"
+			if FileAccess.file_exists(quest_file):
+				var dir = DirAccess.open("user://")
+				if dir:
+					dir.remove("quests.json")
+					print("DebugManager: Deleted saved quest data file")
+		
+		# Force reload of JSON quests
+		QuestManager.load_quest_files()
+	
+	if UIManager:
+		UIManager.show_toast("Quest data cleared - JSON quests loaded!", "success")
+	
+	debug_action_completed.emit("clear_quest_data")
+
 func show_debug_options():
 	"""Show debug options dialog or panel"""
 	print("DebugManager: Showing debug options")

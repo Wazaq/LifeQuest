@@ -30,16 +30,22 @@ enum QuestState {
 	EXPIRED
 }
 
+# Quest JSON Files
+var quest_files = [
+		"res://data/quests/physiological_quests.json",
+		"res://data/quests/tutorial_quests.json"
+	]
+
 # Quests dictionaries
-var all_quests = {}  # All possible quests by ID
+var master_quest_list = {}  # All possible quests by ID
 var active_quests = {}  # Currently active quests by ID
 var available_quests = {}  # Quests available to take by ID
 var completed_quests = {}  # Completed quests with timestamps by ID
 var failed_quests = []  # Failed quests with timestamps
 
 # Quest configuration
-var max_active_quests = 10  # Maximum number of active quests allowed
-var available_quest_count = 10  # Number of quests available at once
+var max_active_quests = 99  # Maximum number of active quests allowed
+var available_quest_count = 99  # Number of quests available at once
 var last_refresh_time = 0  # Unix timestamp of last quest refresh
 
 signal quest_created(quest)
@@ -49,6 +55,12 @@ signal quest_completed(quest_id, rewards)
 signal quest_failed(quest_id)
 signal quest_expired(quest_id)
 signal available_quests_refreshed
+
+func debug_reset_dictionaries():
+	active_quests.clear()
+	available_quests.clear()
+	completed_quests.clear()
+	failed_quests.clear()
 
 func _ready():
 	print("QuestManager: Initializing quest system...")
@@ -67,7 +79,7 @@ func _ready():
 	add_child(timer)
 	
 	# Add example quests if there are no quests yet
-	call_deferred("add_example_quests")
+	call_deferred("load_quest_files")
 
 # Create a new quest
 func create_quest(quest_data):
@@ -84,8 +96,8 @@ func create_quest(quest_data):
 	if quest.id.is_empty():
 		quest.id = "quest_" + str(Time.get_unix_time_from_system())
 	
-	# Store in all_quests dictionary
-	all_quests[quest.id] = quest
+	# Store in master_quest_list dictionary
+	master_quest_list[quest.id] = quest
 	
 	# Save the updated quests data
 	_save_game_data()
@@ -293,7 +305,7 @@ func get_available_quest_count() -> int:
 	var eligible_count = 0
 	
 	# Count all quests not active or on cooldown
-	for quest_id in all_quests:
+	for quest_id in master_quest_list:
 		# Skip active quests
 		if active_quests.has(quest_id):
 			continue
@@ -321,7 +333,7 @@ func refresh_available_quests():
 	# Get all quests not active or on cooldown
 	var eligible_quests = {}
 	
-	for quest_id in all_quests:
+	for quest_id in master_quest_list:
 		# Skip active quests
 		if active_quests.has(quest_id):
 			continue
@@ -337,7 +349,7 @@ func refresh_available_quests():
 				continue
 		
 		# Quest is eligible
-		eligible_quests[quest_id] = all_quests[quest_id]
+		eligible_quests[quest_id] = master_quest_list[quest_id]
 	
 	# If we have fewer eligible quests than our desired count, use all of them
 	if eligible_quests.size() <= available_quest_count:
@@ -361,6 +373,23 @@ func refresh_available_quests():
 	
 	_save_game_data()
 	return available_quests.size()
+
+func restore_active_quests():
+	# Load saved active quests from file
+	var saved_active_quests = DataManager.load_active_quests()
+	
+	for quest_id in saved_active_quests:
+		# Make sure quest still exists in master library
+		if master_quest_list.has(quest_id):
+			# Restore to active list
+			active_quests[quest_id] = master_quest_list[quest_id]
+			# Remove from available since it's active
+			available_quests.erase(quest_id)
+		else:
+			# Quest no longer exists in library - maybe log this?
+			print("QuestManager: Saved active quest not found in library: %s" % quest_id)
+	
+	print("QuestManager: Restored %d active quests" % active_quests.size())
 
 # Check if a quest's cooldown period has completed
 func _is_cooldown_complete(completion_time: int, cooldown_hours: int) -> bool:
@@ -386,86 +415,75 @@ func reset_all_cooldowns():
 	
 	return completed_quests.size()
 
-# Add example quests for development
-func add_example_quests():
-	# Only add if we don't have any quests yet
-	if not all_quests.is_empty():
-		return
-		
-	print("QuestManager: Adding example quests")
+# Load quest data from JSON files
+func load_quest_files():
+	print("QuestManager: Loading quest data from JSON files")
 	
-	# Example 1: The Wardrobe's Whisper
-	var quest1 = QuestResource.new()
-	quest1.id = "wardrobe_whisper"
-	quest1.title = "The Wardrobe's Whisper"
-	quest1.description = "Tackle the task of sorting and organizing clothes."
-	quest1.difficulty = QuestDifficulty.INTERMEDIATE
-	quest1.category = "routine"
-	quest1.xp_reward = 3
-	quest1.cooldown_hours = 72  # 3 days
-	quest1.has_deadline = true
-	quest1.deadline = Time.get_unix_time_from_system() + randi_range(12, 48) * 3600  # 12-48 hours
-	quest1.icon_path = "res://assets/icons/quests/wardrobe.png"  # Will need to create this
-	create_quest(quest1)
+	# Clear existing quests to ensure clean loading
+	master_quest_list.clear()
+	available_quests.clear()
+	active_quests.clear()
 	
-	# Example 2: The Spare Room Saga
-	var quest2 = QuestResource.new()
-	quest2.id = "spare_room_saga"
-	quest2.title = "The Spare Room Saga"
-	quest2.description = "Clean and organize your spare room or storage area."
-	quest2.difficulty = QuestDifficulty.HARD
-	quest2.category = "routine"
-	quest2.xp_reward = 5
-	quest2.cooldown_hours = 168  # 7 days
-	quest2.has_deadline = true
-	quest2.deadline = Time.get_unix_time_from_system() + randi_range(24, 72) * 3600  # 1-3 days
-	quest2.icon_path = "res://assets/icons/quests/room.png"  # Will need to create this
-	create_quest(quest2)
+	var total_loaded = 0
 	
-	# Example 3: Scholar's Journey
-	var quest3 = QuestResource.new()
-	quest3.id = "scholars_journey"
-	quest3.title = "Scholar's Journey"
-	quest3.description = "Spend 30 minutes learning something new."
-	quest3.difficulty = QuestDifficulty.EASY
-	quest3.category = "learning"
-	quest3.xp_reward = 2
-	quest3.cooldown_hours = 24  # 1 day
-	quest3.has_deadline = true
-	quest3.deadline = Time.get_unix_time_from_system() + randi_range(6, 24) * 3600  # 6-24 hours
-	quest3.icon_path = "res://assets/icons/quests/book.png"  # Will need to create this
-	create_quest(quest3)
+	# Load each quest file, This is set up top in the header area
+	for file_path in quest_files:
+		var loaded_count = _load_quest_file(file_path)
+		total_loaded += loaded_count
 	
-	# Example 4: Morning Expedition
-	var quest4 = QuestResource.new()
-	quest4.id = "morning_expedition"
-	quest4.title = "Morning Expedition"
-	quest4.description = "Take a 20-minute walk in the morning."
-	quest4.difficulty = QuestDifficulty.EASY
-	quest4.category = "physical"
-	quest4.xp_reward = 2
-	quest4.cooldown_hours = 24  # 1 day
-	quest4.has_deadline = true
-	quest4.deadline = Time.get_unix_time_from_system() + randi_range(8, 36) * 3600  # 8-36 hours
-	quest4.icon_path = "res://assets/icons/quests/walk.png"  # Will need to create this
-	create_quest(quest4)
+	print("QuestManager: Loaded %d total quests from %d files" % [total_loaded, quest_files.size()])
 	
-	# Example 5: Social Diplomat
-	var quest5 = QuestResource.new()
-	quest5.id = "social_diplomat"
-	quest5.title = "Social Diplomat"
-	quest5.description = "Reach out to a friend or family member you haven't spoken to in a while."
-	quest5.difficulty = QuestDifficulty.INTERMEDIATE
-	quest5.category = "social"
-	quest5.xp_reward = 3
-	quest5.cooldown_hours = 48  # 2 days
-	quest5.has_deadline = true
-	quest5.deadline = Time.get_unix_time_from_system() + randi_range(18, 60) * 3600  # 18-60 hours
-	quest5.icon_path = "res://assets/icons/quests/social.png"  # Will need to create this
-	create_quest(quest5)
-	
-	# Make sure available quests are refreshed
+	# Make sure the active and available quests are refreshed
+	restore_active_quests()
 	refresh_available_quests()
+
+# Load a single quest file
+func _load_quest_file(file_path: String) -> int:
+	var file = FileAccess.open(file_path, FileAccess.READ)
+	if not file:
+		push_error("QuestManager: Could not open %s" % file_path)
+		return 0
+	
+	var json_text = file.get_as_text()
+	file.close()
+	
+	var json = JSON.new()
+	var parse_result = json.parse(json_text)
+	if parse_result != OK:
+		push_error("QuestManager: Failed to parse %s" % file_path)
+		return 0
+	
+	var quest_data = json.data
+	var loaded_count = 0
+	
+	# Create quest resources from JSON data
+	for quest_id in quest_data:
+		var quest_info = quest_data[quest_id]
+		
+		# Check if quest is non-repeatable and already completed
+		var is_repeatable = quest_info.get("repeatable", true)
+		if not is_repeatable and completed_quests.has(quest_id):
+			print("QuestManager: Skipping non-repeatable completed quest - %s" % quest_info.get("title", quest_id))
+			continue
+		
+		# Create quest resource using from_dictionary method
+		var quest = QuestResource.new()
+		quest.from_dictionary(quest_info)
+		
+		# Set deadline based on duration_hours if specified
+		if quest_info.has("duration_hours") and quest_info.get("duration_hours", 0) > 0:
+			var duration_hours = quest_info.get("duration_hours", 24)
+			quest.set_deadline_hours(duration_hours)
+		
+		# Add to master quest list
+		master_quest_list[quest.id] = quest
+		loaded_count += 1
+		#print("QuestManager: Loaded quest - %s" % quest.title)
+	
+	print("QuestManager: Loaded %d quests from %s" % [loaded_count, file_path])
+	return loaded_count
+
+
 
 # Save all quest data
 func _save_game_data():
@@ -474,9 +492,9 @@ func _save_game_data():
 		return false
 	
 	# Save all quests
-	var serialized_all_quests = {}
-	for quest_id in all_quests:
-		serialized_all_quests[quest_id] = all_quests[quest_id].to_dictionary()
+	var serialized_master_quest_list = {}
+	for quest_id in master_quest_list:
+		serialized_master_quest_list[quest_id] = master_quest_list[quest_id].to_dictionary()
 	
 	# Save active quests
 	var serialized_active_quests = {}
@@ -490,7 +508,7 @@ func _save_game_data():
 	
 	# Create save data structure
 	var quest_save_data = {
-		"all_quests": serialized_all_quests,
+		"master_quest_list": serialized_master_quest_list,
 		"active_quests": serialized_active_quests,
 		"available_quests": serialized_available_quests,
 		"completed_quests": completed_quests,  # Already in dictionary form
@@ -511,7 +529,7 @@ func _save_game_data():
 # Load all quest data
 func _load_game_data():
 	if not get_node_or_null("/root/DataManager"):
-		push_error("QuestManager: DataManager not found, can't load quest data")
+		push_error("QuestManager: ERROR - DataManager not found, can't load quest data")
 		return false
 	
 	# Load data using DataManager
@@ -522,11 +540,11 @@ func _load_game_data():
 		return false
 	
 	# Load all quests
-	if quest_data.has("all_quests"):
-		all_quests.clear()
-		for quest_id in quest_data.all_quests:
-			var quest = QuestResource.new(quest_data.all_quests[quest_id])
-			all_quests[quest_id] = quest
+	if quest_data.has("master_quest_list"):
+		master_quest_list.clear()
+		for quest_id in quest_data.master_quest_list:
+			var quest = QuestResource.new(quest_data.master_quest_list[quest_id])
+			master_quest_list[quest_id] = quest
 	
 	# Load active quests
 	if quest_data.has("active_quests"):
@@ -555,7 +573,7 @@ func _load_game_data():
 		last_refresh_time = quest_data.last_refresh_time
 	
 	print("QuestManager: Quest data loaded successfully")
-	print("QuestManager: All quests: %d, Active: %d, Available: %d, Completed: %d" % 
-		[all_quests.size(), active_quests.size(), available_quests.size(), completed_quests.size()])
+	print("QuestManager: Master quest list: %d, Active: %d, Available: %d, Completed: %d" % 
+		[master_quest_list.size(), active_quests.size(), available_quests.size(), completed_quests.size()])
 	
 	return true

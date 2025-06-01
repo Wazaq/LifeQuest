@@ -85,7 +85,7 @@ func _ready():
 	_update_state(NarrativeState.WORLD_INTRO)
 
 func _update_state(new_state):
-	print("CharacterIntro: Updating state to ", new_state)
+	#print("CharacterIntro: Updating state to ", new_state)
 	current_state = new_state
 	
 	# Disconnect any existing signal connections to avoid duplicates
@@ -144,23 +144,23 @@ func _disconnect_all_dialog_signals():
 		DialogManager.dialog_choice_selected.disconnect(_on_tutorial_choice_selected)
 
 func _on_intro_dialog_completed():
-	print("CharacterIntro: Intro dialog completed")
+	#print("CharacterIntro: Intro dialog completed")
 	_update_state(NarrativeState.TAVERN_EXTERIOR)
 
 func _on_exterior_dialog_completed():
-	print("CharacterIntro: Exterior dialog completed")
+	#print("CharacterIntro: Exterior dialog completed")
 	_update_state(NarrativeState.TAVERN_INTERIOR)
 
 func _on_interior_dialog_completed():
-	print("CharacterIntro: Interior dialog completed")
+	#print("CharacterIntro: Interior dialog completed")
 	_update_state(NarrativeState.CHARACTER_CREATION)
 	
 func _on_welcome_completed():
-	print("CharacterIntro: Welcome dialog completed")
+	#print("CharacterIntro: Welcome dialog completed")
 	_update_state(NarrativeState.TUTORIAL_OPTION)
 	
 func _on_tutorial_choice_selected(choice_index: int):
-	print("CharacterIntro: Tutorial choice selected: ", choice_index)
+	#print("CharacterIntro: Tutorial choice selected: ", choice_index)
 	
 	if choice_index == 0:
 		# Yes - Start tutorial and go to tavern hub in tutorial mode

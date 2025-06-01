@@ -121,8 +121,7 @@ func open_screen(screen_name: String, data = null):
 			screen_path = "res://scenes/quests/quest_details.tscn"
 		"quest_creation":
 			screen_path = "res://scenes/quests/quest_creation.tscn"
-		"main_menu":
-			screen_path = "res://scenes/main_menu/main_menu.tscn"
+
 		"character_creation":# TODO: May need to remove, changed onboarding
 			screen_path = "res://scenes/character/character_creation.tscn"
 		"character_profile":
@@ -173,8 +172,7 @@ func go_back():
 	var current_index = children.find(current_screen)
 	
 	if current_index <= 0 or current_index >= children.size():
-		# No previous screen, try to go to main menu
-		open_screen("main_menu")
+		# No previous screen available
 		return
 		
 	# Get previous screen
@@ -374,3 +372,5 @@ func set_main_container(container: Control):
 func set_toast_container(container: Control):
 	toast_container = container
 	print("UIManager: Set toast container to %s" % container.name)
+
+

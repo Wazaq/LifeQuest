@@ -52,6 +52,7 @@ func _setup_debug_buttons():
 	var character_profile_btn = debug_section.get_node_or_null("CharacterProfileTutorialButton")
 	var reset_tutorial_btn = debug_section.get_node_or_null("ResetTutorialButton")
 	var add_quests_btn = debug_section.get_node_or_null("AddTestQuestsButton")
+	var clear_quest_data_btn = debug_section.get_node_or_null("ClearQuestDataButton")
 	
 	if start_tutorial_btn:
 		start_tutorial_btn.connect("pressed", Callable(self, "_on_start_tutorial_directly"))
@@ -63,6 +64,8 @@ func _setup_debug_buttons():
 		reset_tutorial_btn.connect("pressed", Callable(self, "_on_reset_tutorial_only"))
 	if add_quests_btn:
 		add_quests_btn.connect("pressed", Callable(self, "_on_add_test_quests"))
+	if clear_quest_data_btn:
+		clear_quest_data_btn.connect("pressed", Callable(self, "_on_clear_quest_data"))
 
 # Debug button handlers
 func _on_start_tutorial_directly():
@@ -85,6 +88,10 @@ func _on_add_test_quests():
 	if GameManager.is_debug_mode_available():
 		GameManager.get_debug_manager().add_test_quests()
 
+func _on_clear_quest_data():
+	if GameManager.is_debug_mode_available():
+		GameManager.get_debug_manager().clear_quest_data()
+
 func _on_reset_button_pressed():
 	print("MoreScreen: Reset button pressed")
 	
@@ -95,6 +102,10 @@ func _on_reset_button_pressed():
 		DataManager.delete_save_file(DataManager.COMPLETED_QUESTS_SAVE_FILE)
 		DataManager.delete_save_file(DataManager.SETTINGS_SAVE_FILE)
 		
+		if get_node_or_null("/root/QuestManager"):
+			# Blow out the quest data
+			DebugManager.clear_quest_data()
+			
 		if get_node_or_null("/root/UIManager"):
 			UIManager.show_toast("Game data reset successfully!", "success")
 		

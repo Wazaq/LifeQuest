@@ -224,7 +224,7 @@ func create_quest_card(quest):
 	var xp_icon = load("res://assets/icons/ui/xp.png")
 	var timer_icon = load("res://assets/icons/ui/time.png")
 	
-	# Create a panel for the quest card (like your test cards)
+	# Create a panel for the quest cards
 	var quest_card = Panel.new()
 	quest_card.custom_minimum_size = Vector2(300, 120)
 
@@ -248,7 +248,15 @@ func create_quest_card(quest):
 	
 	quest_card.add_theme_stylebox_override("panel", style_box)
 	
-	# Create quick complete button (floating in top-right)
+	# Add margin container first
+	var margin_container = MarginContainer.new()
+	margin_container.add_theme_constant_override("margin_left", 15)
+	margin_container.add_theme_constant_override("margin_top", 15)
+	margin_container.add_theme_constant_override("margin_right", 15)
+	margin_container.add_theme_constant_override("margin_bottom", 15)
+	quest_card.add_child(margin_container)
+	
+	# Create quick complete button (floating in top-right) - add AFTER margin container
 	var quick_complete_button = Button.new()
 	quick_complete_button.text = ""
 	# Load and set the lightning bolt icon
@@ -281,14 +289,6 @@ func create_quest_card(quest):
 	quick_complete_button.pressed.connect(_on_quick_complete_pressed.bind(quest))
 
 	quest_card.add_child(quick_complete_button)
-	
-	# Add margin container
-	var margin_container = MarginContainer.new()
-	margin_container.add_theme_constant_override("margin_left", 15)
-	margin_container.add_theme_constant_override("margin_top", 15)
-	margin_container.add_theme_constant_override("margin_right", 15)
-	margin_container.add_theme_constant_override("margin_bottom", 15)
-	quest_card.add_child(margin_container)
 	
 	# Add content container
 	var content_container = VBoxContainer.new()
@@ -770,3 +770,5 @@ func _complete_tutorial():
 	# Navigate to character screen
 	if get_node_or_null("/root/UIManager"):
 		UIManager.open_screen("character_profile")
+
+

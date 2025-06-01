@@ -3,13 +3,14 @@
 [ext_resource type="Script" uid="uid://dn03vmjdnubrr" path="res://scripts/ui/toast_notification.gd" id="1_xsy5g"]
 
 [node name="ToastNotification" type="PanelContainer"]
+custom_minimum_size = Vector2(270, 0)
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -200.0
-offset_top = 20.0
-offset_right = 200.0
-offset_bottom = 80.0
+offset_left = -170.0
+offset_top = 12.5
+offset_right = 170.0
+offset_bottom = 87.5
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
@@ -22,8 +23,10 @@ alignment = 1
 
 [node name="MessageLabel" type="Label" parent="HBoxContainer"]
 auto_translate_mode = 2
+custom_minimum_size = Vector2(270, 75)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Notification message"
 horizontal_alignment = 1
 vertical_alignment = 1
+autowrap_mode = 2
