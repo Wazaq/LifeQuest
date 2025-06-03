@@ -41,7 +41,7 @@ var master_quest_list = {}  # All possible quests by ID
 var active_quests = {}  # Currently active quests by ID
 var available_quests = {}  # Quests available to take by ID
 var completed_quests = {}  # Completed quests with timestamps by ID
-var failed_quests = []  # Failed quests with timestamps
+var failed_quests = {}  # Failed quests with timestamps
 
 # Quest configuration
 var max_active_quests = 99  # Maximum number of active quests allowed
@@ -61,9 +61,11 @@ func debug_reset_dictionaries():
 	available_quests.clear()
 	completed_quests.clear()
 	failed_quests.clear()
+	
 
-func _ready():
+func _ready():	
 	print("QuestManager: Initializing quest system...")
+	
 	
 	# Load game data if available
 	call_deferred("_load_game_data")
@@ -139,6 +141,7 @@ func start_quest(quest_id):
 	
 	emit_signal("quest_started", quest_id)
 	print("QuestManager: Started quest - %s" % quest.title)
+	
 	return true
 
 # Update progress on a multi-step quest
@@ -200,6 +203,7 @@ func complete_quest(quest_id):
 	
 	emit_signal("quest_completed", quest_id, rewards)
 	print("QuestManager: Completed quest - %s" % quest.title)
+
 	return rewards
 
 # Fail a quest
@@ -216,7 +220,7 @@ func fail_quest(quest_id):
 	# Store in failed_quests with timestamp
 	var failed_data = quest.to_dictionary()
 	failed_data["failure_time"] = Time.get_unix_time_from_system()
-	failed_quests.append(failed_data)
+	failed_quests[quest_id] = failed_data
 	
 	# Remove from active quests
 	active_quests.erase(quest_id)
@@ -225,6 +229,7 @@ func fail_quest(quest_id):
 	
 	emit_signal("quest_failed", quest_id)
 	print("QuestManager: Failed quest - %s" % quest.title)
+
 	return true
 
 # Check for expired quests
@@ -263,6 +268,19 @@ func expire_quest(quest_id):
 	print("QuestManager: Expired quest - %s" % quest.title)
 	return true
 
+# Check the Quests cooldown
+func check_quest_cooldown(quest_id: String) -> bool:
+	# Check completed quests (full cooldown)
+	if completed_quests.has(quest_id):
+		var data = completed_quests[quest_id]
+		return _is_cooldown_complete(data.get("completion_time", 0), data.get("cooldown_hours", 0))
+	
+	# Check failed quests (half cooldown)
+	if failed_quests.has(quest_id):
+		var data = failed_quests[quest_id]
+		return _is_cooldown_complete(data.get("failure_time", 0), data.get("cooldown_hours", 0) / 2)
+	
+	return true # Avaialable
 # Get a difficulty name from the enum value
 func get_difficulty_name(difficulty: int) -> String:
 	match difficulty:
@@ -309,6 +327,10 @@ func get_available_quest_count() -> int:
 		# Skip active quests
 		if active_quests.has(quest_id):
 			continue
+			
+		# Skip failed quests
+		if failed_quests.has(quest_id):
+			continue
 		
 		# Check cooldown for completed quests
 		if completed_quests.has(quest_id):
@@ -337,6 +359,15 @@ func refresh_available_quests():
 		# Skip active quests
 		if active_quests.has(quest_id):
 			continue
+			
+		if failed_quests.has(quest_id):
+			var failure_data = failed_quests[quest_id]
+			var completion_time = failure_data.get("failure_time", 0)
+			var cooldown_hours = failure_data.get("cooldown_hours", 0)
+			
+			# Skip if still on cooldown
+			if not _is_cooldown_complete(completion_time, cooldown_hours):
+				continue
 		
 		# Check cooldown for completed quests
 		if completed_quests.has(quest_id):
@@ -372,6 +403,7 @@ func refresh_available_quests():
 	print("QuestManager: Refreshed available quests (%d/%d eligible)" % [available_quests.size(), eligible_quests.size()])
 	
 	_save_game_data()
+	
 	return available_quests.size()
 
 func restore_active_quests():
@@ -401,19 +433,25 @@ func _is_cooldown_complete(completion_time: int, cooldown_hours: int) -> bool:
 	
 	return (current_time - completion_time) >= cooldown_seconds
 
-# Reset cooldowns for all completed quests
-func reset_all_cooldowns():
-	# Remove all cooldowns from completed quests
-	for quest_id in completed_quests.keys():
-		# Just update the completion time to way in the past
-		completed_quests[quest_id]["completion_time"] = 0
-	
-	print("QuestManager: Reset all quest cooldowns")
-	
-	# Refresh the available quests
-	refresh_available_quests()
-	
-	return completed_quests.size()
+## OBW, debug is in settings area, leaving here just in case I forgot something
+## Reset cooldowns for all completed quests
+#func reset_all_cooldowns():
+	## Remove all cooldowns from completed quests
+	#for quest_id in completed_quests.keys():
+		## Just update the completion time to way in the past
+		#completed_quests[quest_id]["completion_time"] = 0
+		#
+		## Remove all cooldowns from failed quests
+	#for quest_id in failed_quests.keys():
+		## Just update the completion time to way in the past
+		#failed_quests[quest_id]["failure_time"] = 0
+	#
+	#print("QuestManager: Reset all quest cooldowns")
+	#
+	## Refresh the available quests
+	#refresh_available_quests()
+	#
+	#return completed_quests.size()
 
 # Load quest data from JSON files
 func load_quest_files():
@@ -487,6 +525,7 @@ func _load_quest_file(file_path: String) -> int:
 
 # Save all quest data
 func _save_game_data():
+	print("QuestManager: Currently Saving Game Data")
 	if not get_node_or_null("/root/DataManager"):
 		push_error("QuestManager: DataManager not found, can't save quest data")
 		return false
@@ -511,8 +550,8 @@ func _save_game_data():
 		"master_quest_list": serialized_master_quest_list,
 		"active_quests": serialized_active_quests,
 		"available_quests": serialized_available_quests,
-		"completed_quests": completed_quests,  # Already in dictionary form
-		"failed_quests": failed_quests,  # Already in array form
+		"completed_quests": completed_quests,
+		"failed_quests": failed_quests,
 		"last_refresh_time": last_refresh_time
 	}
 	
@@ -523,6 +562,7 @@ func _save_game_data():
 		print("QuestManager: Quest data saved successfully")
 	else:
 		push_error("QuestManager: Failed to save quest data")
+	print("QuestManager: Save Status: ", save_result)
 	
 	return save_result
 
@@ -545,6 +585,8 @@ func _load_game_data():
 		for quest_id in quest_data.master_quest_list:
 			var quest = QuestResource.new(quest_data.master_quest_list[quest_id])
 			master_quest_list[quest_id] = quest
+	else:
+		master_quest_list = {}
 	
 	# Load active quests
 	if quest_data.has("active_quests"):
@@ -552,6 +594,8 @@ func _load_game_data():
 		for quest_id in quest_data.active_quests:
 			var quest = QuestResource.new(quest_data.active_quests[quest_id])
 			active_quests[quest_id] = quest
+	else:
+		active_quests = {}
 	
 	# Load available quests
 	if quest_data.has("available_quests"):
@@ -559,14 +603,28 @@ func _load_game_data():
 		for quest_id in quest_data.available_quests:
 			var quest = QuestResource.new(quest_data.available_quests[quest_id])
 			available_quests[quest_id] = quest
+	else:
+		available_quests = {}
 	
 	# Load completed quests (already in dictionary form)
 	if quest_data.has("completed_quests"):
 		completed_quests = quest_data.completed_quests
+	else:
+		completed_quests = {}
 	
-	# Load failed quests (already in array form)
+	# Load failed quests - ensure it's always a Dictionary
 	if quest_data.has("failed_quests"):
-		failed_quests = quest_data.failed_quests
+		var loaded_failed = quest_data.failed_quests
+		if typeof(loaded_failed) == TYPE_DICTIONARY:
+			failed_quests = loaded_failed
+			print("QuestManager: Loaded failed_quests as Dictionary")
+		else:
+			# Old save data had Array, convert to Dictionary
+			failed_quests = {}
+			print("QuestManager: Converted old Array failed_quests to Dictionary")
+	else:
+		failed_quests = {}
+		print("QuestManager: Initialized failed_quests as Dictionary")
 	
 	# Load last refresh time
 	if quest_data.has("last_refresh_time"):

@@ -90,7 +90,7 @@ func from_dictionary(data: Dictionary):
 
 # Calculate XP reward based on difficulty and steps
 func calculate_xp_reward() -> int:
-	var base_xp = 10
+	var base_xp = 2
 	
 	# Multiply by difficulty factor
 	var difficulty_multiplier = 1.0

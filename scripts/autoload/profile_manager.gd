@@ -47,8 +47,21 @@ func _ready():
 func create_character(player_name: String, avatar: String = ""):
 	current_character.name = player_name
 	current_character.avatar = avatar
+	current_character.level = 1
+	current_character.xp = 0
+	current_character.xp_to_next_level = 100
+	current_character.stats = {
+		CharacterStat.STRENGTH: 1,
+		CharacterStat.INTELLIGENCE: 1,
+		CharacterStat.WISDOM: 1,
+		CharacterStat.DEXTERITY: 1,
+		CharacterStat.CONSTITUTION: 1,
+		CharacterStat.CHARISMA: 1
+		}
+	current_character.streak = 0
 	current_character.creation_date = Time.get_unix_time_from_system()
 	current_character.last_activity = Time.get_unix_time_from_system()
+	
 	
 	emit_signal("character_created", current_character)
 	print("ProfileManager: Created character - %s" % player_name)
@@ -78,6 +91,9 @@ func add_xp(amount: int):
 	
 	emit_signal("xp_gained", amount, current_character.xp)
 	print("ProfileManager: Added %d XP, total now %d" % [amount, current_character.xp])
+	
+	# Save the profile 
+	DataManager.save_character(ProfileManager.current_character)
 	return current_character.xp
 
 func level_up():

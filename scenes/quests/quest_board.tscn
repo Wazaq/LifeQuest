@@ -60,10 +60,6 @@ layout_mode = 2
 layout_mode = 2
 text = "Seek New Adventure"
 
-[node name="ResetCooldownButton" type="Button" parent="MainContainer/VBoxContainer/ActionSection"]
-layout_mode = 2
-text = "Debug: Reset Cooldown"
-
 [node name="BottomNavBar" parent="." instance=ExtResource("1_lbth6")]
 visible = false
 layout_mode = 1

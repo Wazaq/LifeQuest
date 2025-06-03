@@ -101,6 +101,7 @@ func _on_reset_button_pressed():
 		DataManager.delete_save_file(DataManager.ACTIVE_QUESTS_SAVE_FILE)
 		DataManager.delete_save_file(DataManager.COMPLETED_QUESTS_SAVE_FILE)
 		DataManager.delete_save_file(DataManager.SETTINGS_SAVE_FILE)
+		DataManager.delete_save_file(DataManager.TUTORIAL_SAVE_FILE)
 		
 		if get_node_or_null("/root/QuestManager"):
 			# Blow out the quest data

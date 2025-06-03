@@ -151,7 +151,6 @@ func clear_quest_data():
 	
 	if QuestManager:
 		# Clear all quest dictionaries
-		#QuestManager.all_quests.clear()
 		QuestManager.active_quests.clear()
 		QuestManager.available_quests.clear()
 		QuestManager.completed_quests.clear()

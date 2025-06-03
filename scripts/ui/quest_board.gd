@@ -11,7 +11,6 @@ extends Control
 
 # Action buttons
 @onready var seek_adventure_button: Button = $MainContainer/VBoxContainer/ActionSection/SeekAdventureButton
-@onready var reset_cooldown_button: Button = $MainContainer/VBoxContainer/ActionSection/ResetCooldownButton
 
 # Quest item scene for creating quest cards
 const quest_item_scene = preload("res://scenes/quests/quest_item_improved.tscn")
@@ -58,10 +57,6 @@ var tutorial_steps = [
 func _ready() -> void:
 	print("QuestBoard: Initializing Quest Board")
 	
-	# Hide debug buttons based on category
-	if not GameManager.is_debug_enabled(GameManager.DebugCategory.QUEST_SYSTEM):
-		reset_cooldown_button.visible = false
-	
 	# Wait a frame for everything to be properly setup
 	await get_tree().process_frame
 	
@@ -71,7 +66,6 @@ func _ready() -> void:
 	
 	# Connect button signals
 	seek_adventure_button.pressed.connect(_on_seek_adventure_pressed)
-	reset_cooldown_button.pressed.connect(_on_reset_cooldown_pressed)
 	
 	# Load and display current quest data
 	update_quest_display()
@@ -119,21 +113,21 @@ func _on_seek_adventure_pressed():
 		if get_node_or_null("/root/UIManager"):
 			UIManager.show_toast("No quests available right now", "info")
 	
-func _on_reset_cooldown_pressed():
+#func _on_reset_cooldown_pressed():
 	#print("QuestBoard: Reset cooldown button pressed")
-	
-	if not get_node_or_null("/root/QuestManager"):
-		print("QuestBoard: QuestManager not found")
-		return
-	
-	# Reset all cooldowns
-	var count = QuestManager.reset_all_cooldowns()
-	
-	if get_node_or_null("/root/UIManager"):
-		UIManager.show_toast("Reset cooldowns for %d quests" % count, "info")
-		
-	# Update the seek adventures avail number
-	update_button_states()
+	#
+	#if not get_node_or_null("/root/QuestManager"):
+		#print("QuestBoard: QuestManager not found")
+		#return
+	#
+	## Reset all cooldowns
+	#var count = QuestManager.reset_all_cooldowns()
+	#
+	#if get_node_or_null("/root/UIManager"):
+		#UIManager.show_toast("Reset cooldowns for %d quests" % count, "info")
+		#
+	## Update the seek adventures avail number
+	#update_button_states()
 	
 func update_quest_display():
 	print("QuestBoard: Updating quest display")
@@ -770,5 +764,3 @@ func _complete_tutorial():
 	# Navigate to character screen
 	if get_node_or_null("/root/UIManager"):
 		UIManager.open_screen("character_profile")
-
-
