@@ -27,17 +27,12 @@ layout_mode = 2
 
 [node name="HeaderLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "More Options"
+text = "Settings"
 horizontal_alignment = 1
 
 [node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
-
-[node name="ResetButton" type="Button" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 4
-text = "Reset Game (Debug)"
 
 [node name="DebugSpacer" type="Control" parent="MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 20)
@@ -49,6 +44,11 @@ layout_mode = 2
 [node name="DebugLabel" type="Label" parent="MarginContainer/VBoxContainer/DebugSection"]
 layout_mode = 2
 text = "Debug Tools"
+
+[node name="ResetButton" type="Button" parent="MarginContainer/VBoxContainer/DebugSection"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Reset Game (Debug)"
 
 [node name="StartTutorialButton" type="Button" parent="MarginContainer/VBoxContainer/DebugSection"]
 layout_mode = 2

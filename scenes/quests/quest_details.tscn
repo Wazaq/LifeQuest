@@ -108,6 +108,7 @@ theme_override_font_sizes/font_size = 16
 text = "Time"
 
 [node name="CategoryInfo" type="Label" parent="MarginContainer/QuestCardBackground/ContentContainer/ContentPadding/QuestSections/QuestDetails"]
+visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.239216, 0.160784, 0.0784314, 1)
 theme_override_font_sizes/font_size = 16

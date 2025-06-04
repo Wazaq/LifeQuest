@@ -19,9 +19,12 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 
 [node name="MainContainer" type="MarginContainer" parent="."]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_right = 30
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MainContainer"]
 layout_mode = 2
@@ -48,6 +51,8 @@ layout_mode = 2
 
 [node name="UrgentQuestName" type="Label" parent="MainContainer/HBoxContainer/RightSection"]
 layout_mode = 2
+text_overrun_behavior = 3
 
 [node name="UrgentQuestTime" type="Label" parent="MainContainer/HBoxContainer/RightSection"]
 layout_mode = 2
+text_overrun_behavior = 3

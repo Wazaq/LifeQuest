@@ -9,6 +9,10 @@ extends Control
 @onready var section_title: Label = $MainContainer/VBoxContainer/ActiveQuestSection/SectionTitle
 @onready var quest_list: VBoxContainer = $MainContainer/VBoxContainer/ActiveQuestSection/QuestScrollArea/QuestList
 
+# Touch positions
+var touch_start_pos: Vector2
+var is_dragging: bool = false
+
 # Action buttons
 @onready var seek_adventure_button: Button = $MainContainer/VBoxContainer/ActionSection/SeekAdventureButton
 
@@ -21,7 +25,6 @@ var active_quest_cards = {}
 # Tutorial overlay references
 @onready var tutorial_overlay: Control = $TutorialOverlay
 @onready var tutorial_text: Label = $TutorialOverlay/TutorialText
-@onready var continue_button: Button = $TutorialOverlay/ContinueButton
 @onready var highlight_container: Control = $TutorialOverlay/HighlightContainer
 
 # Tutorial state
@@ -113,21 +116,8 @@ func _on_seek_adventure_pressed():
 		if get_node_or_null("/root/UIManager"):
 			UIManager.show_toast("No quests available right now", "info")
 	
-#func _on_reset_cooldown_pressed():
-	#print("QuestBoard: Reset cooldown button pressed")
-	#
-	#if not get_node_or_null("/root/QuestManager"):
-		#print("QuestBoard: QuestManager not found")
-		#return
-	#
-	## Reset all cooldowns
-	#var count = QuestManager.reset_all_cooldowns()
-	#
-	#if get_node_or_null("/root/UIManager"):
-		#UIManager.show_toast("Reset cooldowns for %d quests" % count, "info")
-		#
-	## Update the seek adventures avail number
-	#update_button_states()
+	# Let's save the quest updates
+	QuestManager._save_game_data()
 	
 func update_quest_display():
 	print("QuestBoard: Updating quest display")
@@ -331,7 +321,7 @@ func create_quest_card(quest):
 	
 	# ✨ CLICKABILITY SPELL ✨
 	# Make the quest card clickable
-	quest_card.gui_input.connect(_on_quest_card_clicked.bind(quest))
+	quest_card.gui_input.connect(_on_quest_card_input.bind(quest, quest_card))
 	quest_card.mouse_filter = Control.MOUSE_FILTER_STOP
 	
 	# Store reference to the card
@@ -375,12 +365,28 @@ func get_difficulty_color(difficulty: int) -> Color:
 		_:  # Special/Unknown
 			return Color(0.2, 0.6, 0.9, 1.0)    # Blue
 
-func _on_quest_card_clicked(event, quest):
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		print("QuestBoard: Quest card clicked - ", quest.title)
-		# Navigate to quest details
-		if get_node_or_null("/root/UIManager"):
-			UIManager.open_screen("quest_details", {"quest_id": quest.id})
+func _on_quest_card_input(event, quest, quest_card_node):
+	if event is InputEventScreenTouch and event.pressed:
+		# Touched started - remember where
+		touch_start_pos = event.position
+		is_dragging = false
+		
+	elif event is InputEventScreenTouch and not event.pressed:
+		# Touch ended - was it a tap or drag?
+		if not is_dragging:
+			# It's a tap ya'll, Open quest details!
+			print("QuestBoard: Quest card tapped - ", quest.title)
+			if get_node_or_null("/root/UIManager"):
+				UIManager.open_screen("quest_details", {"quest_id": quest.id})
+				
+	elif  event is InputEventScreenDrag:
+		# Finger is moving! but how far?
+		var distance = touch_start_pos.distance_to(event.position)
+		# Dev Note: 15px too high
+		if distance > 8: # how many px before we start scrolling
+			is_dragging = true
+			# Letting the scrollbox do it's job
+			quest_card_node.mouse_filter = Control.MOUSE_FILTER_PASS
 
 func _on_quick_complete_pressed(quest):
 	print("QuestBoard: Quick complete pressed for - ", quest.title)
@@ -654,12 +660,6 @@ func _show_tutorial_step(step_index: int):
 	# Add highlight for target element
 	if step_data["highlight_target"] != "":
 		_highlight_element(step_data["highlight_target"])
-	
-	# Update button text
-	if step_index == tutorial_steps.size() - 1:
-		continue_button.text = "Continue to Character Screen"
-	else:
-		continue_button.text = "Continue"
 
 func _highlight_element(target: String):
 	var target_node = null

@@ -1,7 +1,7 @@
 extends Control
 ## MoreScreen: Screen for additional options and settings
 
-@onready var reset_button = $MarginContainer/VBoxContainer/ResetButton
+@onready var reset_button = $MarginContainer/VBoxContainer/DebugSection/ResetButton
 @onready var debug_section = $MarginContainer/VBoxContainer/DebugSection
 
 func _ready():

@@ -69,6 +69,7 @@ anchors_preset = 10
 anchor_bottom = 0.0
 offset_right = 32.0
 offset_bottom = 80.0
+grow_vertical = 1
 
 [node name="NotificationLayer" type="Control" parent="UIRoot"]
 layout_mode = 1
