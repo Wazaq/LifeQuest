@@ -13,12 +13,13 @@ enum QuestDifficulty {
 
 # Quest categories
 const CATEGORIES = [
-	"physical",
-	"mental",
-	"creative",
-	"social",
-	"routine",
-	"learning"
+	"physiological",
+	"safety", 
+	"security",
+	"love",
+	"belonging",
+	"esteem",
+	"self_actualization"
 ]
 
 # Quest states
@@ -36,12 +37,26 @@ var quest_files = [
 		"res://data/quests/tutorial_quests.json"
 	]
 
-# Quests dictionaries
-var master_quest_list = {}  # All possible quests by ID
-var active_quests = {}  # Currently active quests by ID
-var available_quests = {}  # Quests available to take by ID
-var completed_quests = {}  # Completed quests with timestamps by ID
-var failed_quests = {}  # Failed quests with timestamps
+# Quest data - separated from quest library
+var master_quest_list = {}  # All possible quests loaded from JSON files (library)
+var player_quest_data = {}  # Player's quest state (active, completed, failed, etc.)
+
+# Easy access to player quest sections
+var active_quests = {}  # Reference to player_quest_data.active_quests
+var completed_quests = {}  # Reference to player_quest_data.completed_quests
+var failed_quests = {}  # Reference to player_quest_data.failed_quests
+var available_quests = {}  # Dynamically calculated from library minus player state
+
+# Tier unlocking system
+var tier_unlock_requirements = {
+	"physiological": {},  # Always unlocked
+	"safety": {"physiological": 10},
+	"security": {"physiological": 5, "safety": 10},
+	"love": {"physiological": 5, "safety": 5, "security": 10},
+	"belonging": {"physiological": 5, "safety": 5, "security": 5, "love": 10},
+	"esteem": {"physiological": 5, "safety": 5, "security": 5, "love": 5, "belonging": 10},
+	"self_actualization": {"physiological": 5, "safety": 5, "security": 5, "love": 5, "belonging": 5, "esteem": 10}
+}
 
 # Quest configuration
 var max_active_quests = 99  # Maximum number of active quests allowed
@@ -66,12 +81,11 @@ func debug_reset_dictionaries():
 func _ready():	
 	print("QuestManager: Initializing quest system...")
 	
+	# Load quest library from JSON files (quest definitions)
+	call_deferred("load_quest_library")
 	
-	# Load game data if available
-	call_deferred("_load_game_data")
-	
-	# Set initial last refresh time
-	last_refresh_time = Time.get_unix_time_from_system()
+	# Load player quest data (active, completed, failed states)
+	call_deferred("load_player_quest_data")
 	
 	# Set up a timer to check for quest expirations
 	var timer = Timer.new()
@@ -79,9 +93,6 @@ func _ready():
 	timer.autostart = true
 	timer.connect("timeout", Callable(self, "_check_quest_expirations"))
 	add_child(timer)
-	
-	# Add example quests if there are no quests yet
-	call_deferred("load_quest_files")
 
 # Create a new quest
 func create_quest(quest_data):
@@ -178,6 +189,13 @@ func complete_quest(quest_id):
 		return false
 	
 	var quest = active_quests[quest_id]
+	var category = quest.category
+	var completion_counts = player_quest_data.get("completion_counts", {})
+	completion_counts[category] = completion_counts.get(category, 0) + 1
+	player_quest_data["completion_counts"] = completion_counts
+	
+	# Check if new tiers should unlock
+	check_tier_unlocks()
 	
 	# Update quest state
 	quest.state = QuestState.COMPLETED
@@ -205,6 +223,46 @@ func complete_quest(quest_id):
 	print("QuestManager: Completed quest - %s" % quest.title)
 
 	return rewards
+
+# Check if new tiers should unlock based on completion counts
+func check_tier_unlocks():
+	var completion_counts = player_quest_data.get("completion_counts", {})
+	var unlocked_categories = player_quest_data.get("unlocked_categories", ["physiological", "tutorial"])
+	var newly_unlocked = []
+	
+	# Check each tier to see if it should be unlocked
+	for tier in tier_unlock_requirements:
+		# Skip if already unlocked
+		if tier in unlocked_categories:
+			continue
+		
+		var requirements = tier_unlock_requirements[tier]
+		var tier_unlocked = true
+		
+		# Check if all requirements are met
+		for required_category in requirements:
+			var required_count = requirements[required_category]
+			var current_count = completion_counts.get(required_category, 0)
+			
+			if current_count < required_count:
+				tier_unlocked = false
+				break
+		
+		# If all requirements met, unlock this tier
+		if tier_unlocked:
+			unlocked_categories.append(tier)
+			newly_unlocked.append(tier)
+			print("QuestManager: Unlocked new tier - %s!" % tier)
+	
+	# Update player data if any new tiers were unlocked
+	if newly_unlocked.size() > 0:
+		player_quest_data["unlocked_categories"] = unlocked_categories
+		print("QuestManager: Total unlocked categories: %s" % str(unlocked_categories))
+		
+		# Refresh available quests to include new tier quests
+		call_deferred("merge_new_quests_and_refresh")
+	
+	return newly_unlocked
 
 # Fail a quest
 func fail_quest(quest_id):
@@ -321,16 +379,29 @@ func get_available_quests() -> Dictionary:
 # Get number of available quests (for UI display)
 func get_available_quest_count() -> int:
 	var eligible_count = 0
+	var unlocked_categories = player_quest_data.get("unlocked_categories", ["physiological", "tutorial"])
 	
 	# Count all quests not active or on cooldown
 	for quest_id in master_quest_list:
+		var quest = master_quest_list[quest_id]
+		
+		# Skip if quest category not unlocked yet
+		if not quest.category in unlocked_categories:
+			continue
+		
 		# Skip active quests
 		if active_quests.has(quest_id):
 			continue
 			
-		# Skip failed quests
+		# Skip failed quests on cooldown
 		if failed_quests.has(quest_id):
-			continue
+			var failure_data = failed_quests[quest_id]
+			var completion_time = failure_data.get("failure_time", 0)
+			var cooldown_hours = failure_data.get("cooldown_hours", 0)
+			
+			# Skip if still on cooldown
+			if not _is_cooldown_complete(completion_time, cooldown_hours):
+				continue
 		
 		# Check cooldown for completed quests
 		if completed_quests.has(quest_id):
@@ -352,10 +423,19 @@ func refresh_available_quests():
 	print("QuestManager: Refresh Available quests")
 	available_quests.clear()
 	
+	# Get unlocked categories
+	var unlocked_categories = player_quest_data.get("unlocked_categories", ["physiological", "tutorial"])
+	
 	# Get all quests not active or on cooldown
 	var eligible_quests = {}
 	
 	for quest_id in master_quest_list:
+		var quest = master_quest_list[quest_id]
+		
+		# Skip if quest category not unlocked yet
+		if not quest.category in unlocked_categories:
+			continue
+		
 		# Skip active quests
 		if active_quests.has(quest_id):
 			continue
@@ -380,7 +460,7 @@ func refresh_available_quests():
 				continue
 		
 		# Quest is eligible
-		eligible_quests[quest_id] = master_quest_list[quest_id]
+		eligible_quests[quest_id] = quest
 	
 	# If we have fewer eligible quests than our desired count, use all of them
 	if eligible_quests.size() <= available_quest_count:
@@ -406,23 +486,6 @@ func refresh_available_quests():
 	
 	return available_quests.size()
 
-func restore_active_quests():
-	# Load saved active quests from file
-	var saved_active_quests = DataManager.load_active_quests()
-	
-	for quest_id in saved_active_quests:
-		# Make sure quest still exists in master library
-		if master_quest_list.has(quest_id):
-			# Restore to active list
-			active_quests[quest_id] = master_quest_list[quest_id]
-			# Remove from available since it's active
-			available_quests.erase(quest_id)
-		else:
-			# Quest no longer exists in library - maybe log this?
-			print("QuestManager: Saved active quest not found in library: %s" % quest_id)
-	
-	print("QuestManager: Restored %d active quests" % active_quests.size())
-
 # Check if a quest's cooldown period has completed
 func _is_cooldown_complete(completion_time: int, cooldown_hours: int) -> bool:
 	if cooldown_hours <= 0:
@@ -433,34 +496,12 @@ func _is_cooldown_complete(completion_time: int, cooldown_hours: int) -> bool:
 	
 	return (current_time - completion_time) >= cooldown_seconds
 
-## OBW, debug is in settings area, leaving here just in case I forgot something
-## Reset cooldowns for all completed quests
-#func reset_all_cooldowns():
-	## Remove all cooldowns from completed quests
-	#for quest_id in completed_quests.keys():
-		## Just update the completion time to way in the past
-		#completed_quests[quest_id]["completion_time"] = 0
-		#
-		## Remove all cooldowns from failed quests
-	#for quest_id in failed_quests.keys():
-		## Just update the completion time to way in the past
-		#failed_quests[quest_id]["failure_time"] = 0
-	#
-	#print("QuestManager: Reset all quest cooldowns")
-	#
-	## Refresh the available quests
-	#refresh_available_quests()
-	#
-	#return completed_quests.size()
-
-# Load quest data from JSON files
-func load_quest_files():
-	print("QuestManager: Loading quest data from JSON files")
+# Load quest library from JSON files (quest definitions only)
+func load_quest_library():
+	print("QuestManager: Loading quest library from JSON files")
 	
-	# Clear existing quests to ensure clean loading
+	# Clear and reload quest library (but don't touch player state)
 	master_quest_list.clear()
-	available_quests.clear()
-	active_quests.clear()
 	
 	var total_loaded = 0
 	
@@ -469,10 +510,60 @@ func load_quest_files():
 		var loaded_count = _load_quest_file(file_path)
 		total_loaded += loaded_count
 	
-	print("QuestManager: Loaded %d total quests from %d files" % [total_loaded, quest_files.size()])
+	print("QuestManager: Loaded %d total quest definitions from %d files" % [total_loaded, quest_files.size()])
+
+# Load player quest data (states, not definitions)
+func load_player_quest_data():
+	print("QuestManager: Loading player quest data")
 	
-	# Make sure the active and available quests are refreshed
-	restore_active_quests()
+	# Load player quest data from DataManager
+	player_quest_data = DataManager.load_player_quest_data()
+	
+	# Set up references for easy access
+	active_quests = player_quest_data.get("active_quests", {})
+	completed_quests = player_quest_data.get("completed_quests", {})
+	failed_quests = player_quest_data.get("failed_quests", {})
+	
+	# Convert dictionary data back to QuestResource objects for active quests
+	for quest_id in active_quests:
+		if typeof(active_quests[quest_id]) == TYPE_DICTIONARY:
+			var quest = QuestResource.new()
+			quest.from_dictionary(active_quests[quest_id])
+			active_quests[quest_id] = quest
+	
+	print("QuestManager: Loaded player quest data - Active: %d, Completed: %d, Failed: %d" % 
+		[active_quests.size(), completed_quests.size(), failed_quests.size()])
+	
+	# After both library and player data are loaded, merge new quests and refresh available
+	call_deferred("merge_new_quests_and_refresh")
+
+# Merge new quests from library into player's available pool
+func merge_new_quests_and_refresh():
+	print("QuestManager: Merging new quests from library")
+	
+	var new_quests_added = 0
+	var unlocked_categories = player_quest_data.get("unlocked_categories", ["physiological", "tutorial"])
+	
+	# Find quests in library that player doesn't have yet
+	for quest_id in master_quest_list:
+		var quest = master_quest_list[quest_id]
+		
+		# Skip if quest category not unlocked yet
+		if not quest.category in unlocked_categories:
+			continue
+		
+		# Skip if player already has this quest in any state
+		if quest_id in active_quests or quest_id in completed_quests or quest_id in failed_quests:
+			continue
+		
+		# This is a new quest for the player - add to their data
+		# Note: We don't add it directly to available_quests since that's calculated dynamically
+		new_quests_added += 1
+		print("QuestManager: Found new quest available for player - %s" % quest.title)
+	
+	print("QuestManager: %d new quests available for player" % new_quests_added)
+	
+	# Refresh available quests based on current state
 	refresh_available_quests()
 
 # Load a single quest file
@@ -523,115 +614,30 @@ func _load_quest_file(file_path: String) -> int:
 
 
 
-# Save all quest data
+# Save player quest data using new structure
 func _save_game_data():
-	print("QuestManager: Currently Saving Game Data")
+	print("QuestManager: Saving player quest data")
 	if not get_node_or_null("/root/DataManager"):
 		push_error("QuestManager: DataManager not found, can't save quest data")
 		return false
 	
-	# Save all quests
-	var serialized_master_quest_list = {}
-	for quest_id in master_quest_list:
-		serialized_master_quest_list[quest_id] = master_quest_list[quest_id].to_dictionary()
-	
-	# Save active quests
+	# Serialize active quests to dictionary form
 	var serialized_active_quests = {}
 	for quest_id in active_quests:
 		serialized_active_quests[quest_id] = active_quests[quest_id].to_dictionary()
 	
-	# Save available quests
-	var serialized_available_quests = {}
-	for quest_id in available_quests:
-		serialized_available_quests[quest_id] = available_quests[quest_id].to_dictionary()
-	
-	# Create save data structure
-	var quest_save_data = {
-		"master_quest_list": serialized_master_quest_list,
-		"active_quests": serialized_active_quests,
-		"available_quests": serialized_available_quests,
-		"completed_quests": completed_quests,
-		"failed_quests": failed_quests,
-		"last_refresh_time": last_refresh_time
-	}
+	# Update player quest data structure
+	player_quest_data["active_quests"] = serialized_active_quests
+	player_quest_data["completed_quests"] = completed_quests
+	player_quest_data["failed_quests"] = failed_quests
+	player_quest_data["last_refresh_time"] = last_refresh_time
 	
 	# Save using DataManager
-	var save_result = DataManager.save_data("quests.json", quest_save_data)
+	var save_result = DataManager.save_player_quest_data(player_quest_data)
 	
 	if save_result:
-		print("QuestManager: Quest data saved successfully")
+		print("QuestManager: Player quest data saved successfully")
 	else:
-		push_error("QuestManager: Failed to save quest data")
-	print("QuestManager: Save Status: ", save_result)
+		push_error("QuestManager: Failed to save player quest data")
 	
 	return save_result
-
-# Load all quest data
-func _load_game_data():
-	if not get_node_or_null("/root/DataManager"):
-		push_error("QuestManager: ERROR - DataManager not found, can't load quest data")
-		return false
-	
-	# Load data using DataManager
-	var quest_data = DataManager.load_data("quests.json")
-	
-	if not quest_data:
-		print("QuestManager: No quest data found or failed to load")
-		return false
-	
-	# Load all quests
-	if quest_data.has("master_quest_list"):
-		master_quest_list.clear()
-		for quest_id in quest_data.master_quest_list:
-			var quest = QuestResource.new(quest_data.master_quest_list[quest_id])
-			master_quest_list[quest_id] = quest
-	else:
-		master_quest_list = {}
-	
-	# Load active quests
-	if quest_data.has("active_quests"):
-		active_quests.clear()
-		for quest_id in quest_data.active_quests:
-			var quest = QuestResource.new(quest_data.active_quests[quest_id])
-			active_quests[quest_id] = quest
-	else:
-		active_quests = {}
-	
-	# Load available quests
-	if quest_data.has("available_quests"):
-		available_quests.clear()
-		for quest_id in quest_data.available_quests:
-			var quest = QuestResource.new(quest_data.available_quests[quest_id])
-			available_quests[quest_id] = quest
-	else:
-		available_quests = {}
-	
-	# Load completed quests (already in dictionary form)
-	if quest_data.has("completed_quests"):
-		completed_quests = quest_data.completed_quests
-	else:
-		completed_quests = {}
-	
-	# Load failed quests - ensure it's always a Dictionary
-	if quest_data.has("failed_quests"):
-		var loaded_failed = quest_data.failed_quests
-		if typeof(loaded_failed) == TYPE_DICTIONARY:
-			failed_quests = loaded_failed
-			print("QuestManager: Loaded failed_quests as Dictionary")
-		else:
-			# Old save data had Array, convert to Dictionary
-			failed_quests = {}
-			print("QuestManager: Converted old Array failed_quests to Dictionary")
-	else:
-		failed_quests = {}
-		print("QuestManager: Initialized failed_quests as Dictionary")
-	
-	# Load last refresh time
-	if quest_data.has("last_refresh_time"):
-		last_refresh_time = quest_data.last_refresh_time
-	
-	print("QuestManager: Quest data loaded successfully")
-	print("QuestManager: Master quest list: %d, Active: %d, Available: %d, Completed: %d" % 
-		[master_quest_list.size(), active_quests.size(), available_quests.size(), completed_quests.size()])
-	
-	return true

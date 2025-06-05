@@ -97,11 +97,15 @@ func _on_reset_button_pressed():
 	
 	# Delete save files
 	if get_node_or_null("/root/DataManager"):
-		DataManager.delete_save_file(DataManager.CHARACTER_SAVE_FILE)
-		DataManager.delete_save_file(DataManager.ACTIVE_QUESTS_SAVE_FILE)
-		DataManager.delete_save_file(DataManager.COMPLETED_QUESTS_SAVE_FILE)
+		DataManager.delete_save_file(DataManager.PLAYER_GAME_DATA_FILE)
+		DataManager.delete_save_file(DataManager.PLAYER_QUEST_DATA_FILE)
+		DataManager.delete_save_file(DataManager.PLAYER_TUTORIAL_DATA_FILE)
 		DataManager.delete_save_file(DataManager.SETTINGS_SAVE_FILE)
-		DataManager.delete_save_file(DataManager.TUTORIAL_SAVE_FILE)
+		
+		# Also clean up legacy files if they exist
+		DataManager.delete_save_file(DataManager.LEGACY_CHARACTER_FILE)
+		DataManager.delete_save_file(DataManager.LEGACY_QUESTS_FILE)
+		DataManager.delete_save_file(DataManager.LEGACY_TUTORIAL_FILE)
 		
 		if get_node_or_null("/root/QuestManager"):
 			# Blow out the quest data
@@ -116,3 +120,4 @@ func _on_reset_button_pressed():
 			main_node._navigate_to(main_node.ScreenState.SPLASH)
 		else:
 			print("MoreScreen: Legacy navigation fallback")
+

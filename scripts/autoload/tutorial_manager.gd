@@ -119,7 +119,7 @@ func _save_tutorial_completion():
 	# Save through DataManager
 	if DataManager:
 		DataManager.save_tutorial_data(tutorial_completion_status)
-		DataManager.save_active_quests(QuestManager.active_quests)
+		# Quest data is automatically saved by QuestManager when quests are modified
 
 func _load_tutorial_data():
 	if DataManager:

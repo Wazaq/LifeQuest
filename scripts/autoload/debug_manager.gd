@@ -84,11 +84,11 @@ func reset_tutorial_only():
 	
 	# Remove tutorial data file
 	if DataManager:
-		var tutorial_file = "user://tutorial_data.save"
+		var tutorial_file = "user://lifequest/player_tutorial_data.json"
 		if FileAccess.file_exists(tutorial_file):
-			var dir = DirAccess.open("user://")
+			var dir = DirAccess.open("user://lifequest/")
 			if dir:
-				dir.remove("tutorial_data.save")
+				dir.remove("player_tutorial_data.json")
 	
 	if UIManager:
 		UIManager.show_toast("Tutorial state reset!", "success")
@@ -137,8 +137,7 @@ func add_test_quests():
 			QuestManager.active_quests[quest.id] = quest
 		
 		# Save the quests
-		if DataManager:
-			DataManager.save_active_quests(QuestManager.active_quests)
+		QuestManager._save_game_data()
 	
 	if UIManager:
 		UIManager.show_toast("Test quests added!", "success")
@@ -158,15 +157,16 @@ func clear_quest_data():
 		
 		# Remove the saved quests file
 		if DataManager:
-			var quest_file = "user://quests.json"
+			var quest_file = "user://lifequest/player_quest_data.json"
 			if FileAccess.file_exists(quest_file):
-				var dir = DirAccess.open("user://")
+				var dir = DirAccess.open("user://lifequest/")
 				if dir:
-					dir.remove("quests.json")
+					dir.remove("player_quest_data.json")
 					print("DebugManager: Deleted saved quest data file")
 		
 		# Force reload of JSON quests
-		QuestManager.load_quest_files()
+		QuestManager.load_quest_library()
+		QuestManager.load_player_quest_data()
 	
 	if UIManager:
 		UIManager.show_toast("Quest data cleared - JSON quests loaded!", "success")
