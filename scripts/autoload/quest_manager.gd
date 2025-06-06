@@ -376,7 +376,6 @@ func get_random_quest():
 func get_available_quests() -> Dictionary:
 	return available_quests
 
-# Get number of available quests (for UI display)
 func get_available_quest_count() -> int:
 	var eligible_count = 0
 	var unlocked_categories = player_quest_data.get("unlocked_categories", ["physiological", "tutorial"])
@@ -411,6 +410,10 @@ func get_available_quest_count() -> int:
 			
 			# Skip if still on cooldown
 			if not _is_cooldown_complete(completion_time, cooldown_hours):
+				continue
+			
+			# Skip if non-repeatable and already completed
+			if not quest.repeatable:
 				continue
 		
 		# Quest is eligible
@@ -457,6 +460,10 @@ func refresh_available_quests():
 			
 			# Skip if still on cooldown
 			if not _is_cooldown_complete(completion_time, cooldown_hours):
+				continue
+			
+			# Skip if non-repeatable and already completed
+			if not quest.repeatable:
 				continue
 		
 		# Quest is eligible
@@ -627,10 +634,11 @@ func _save_game_data():
 		serialized_active_quests[quest_id] = active_quests[quest_id].to_dictionary()
 	
 	# Update player quest data structure
+	player_quest_data["last_refresh_time"] = last_refresh_time
 	player_quest_data["active_quests"] = serialized_active_quests
 	player_quest_data["completed_quests"] = completed_quests
 	player_quest_data["failed_quests"] = failed_quests
-	player_quest_data["last_refresh_time"] = last_refresh_time
+	# Note: available_quests is calculated dynamically, not saved
 	
 	# Save using DataManager
 	var save_result = DataManager.save_player_quest_data(player_quest_data)
