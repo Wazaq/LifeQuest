@@ -11,6 +11,7 @@ extends Control
 @onready var player_reset: Button = $MarginContainer/VBoxContainer/PlayerSettings/PlayerReset
 @onready var confirm_reset_dialog: ConfirmationDialog = $MarginContainer/VBoxContainer/PlayerSettings/PlayerReset/ConfirmReset
 @onready var double_confirm_reset_dialog: ConfirmationDialog = $MarginContainer/VBoxContainer/PlayerSettings/PlayerReset/DoubleConfirmReset
+@onready var version_label: Label = $MarginContainer/VBoxContainer/VersionLabel
 
 
 func _ready():
@@ -67,6 +68,9 @@ func _setup_player_settings_buttons():
 	
 	if reset_tutorial_btn:
 		reset_tutorial_btn.connect("pressed", Callable(self, "_on_reset_tutorial"))
+	
+	# Populate the version label
+	version_label.text = "Version: " + ProjectSettings.get_setting("application/config/version", "0.0.0-Beta")
 
 func _setup_debug_buttons():
 	"""Setup debug buttons if debug section exists"""
