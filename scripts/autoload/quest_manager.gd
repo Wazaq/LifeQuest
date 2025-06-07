@@ -59,8 +59,8 @@ var tier_unlock_requirements = {
 }
 
 # Quest configuration
-var max_active_quests = 99  # Maximum number of active quests allowed
-var available_quest_count = 99  # Number of quests available at once
+var max_active_quests = 10  # Maximum number of active quests allowed
+var available_quest_count = 20  # Number of quests available at once
 var last_refresh_time = 0  # Unix timestamp of last quest refresh
 
 signal quest_created(quest)

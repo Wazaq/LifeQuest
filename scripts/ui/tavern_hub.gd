@@ -41,12 +41,12 @@ var tutorial_steps = [
 func _ready() -> void:
 	print("TavernHub: Ready")
 	# The bottom nav bar is only for editor purposes, making sure it's hidden in launch
-	bottom_nav_bar.visible = false
+	if bottom_nav_bar.visible:
+		bottom_nav_bar.visible = false
 	_setup_ui()
 	_setup_tavern_keeper()
 	_update_welcome_message()
 	_check_tutorial_mode()
-	pass
 
 func _setup_ui():
 	# Since we removed the welcome panel, we mainly need to ensure
@@ -128,6 +128,9 @@ func _setup_time_based_keeper_greetings():
 
 # Tutorial system integration
 func _check_tutorial_mode():
+	print("TavernHub: DEBUG: Checking Tutorial Mode")
+	print("TavernHub: DEBUG: tut active? ", TutorialManager.is_tutorial_active())
+	print("TavernHub: DEBUG: current step: ", TutorialManager.get_current_step())
 	# Check if we're in tutorial mode and on the tavern hub step
 	if TutorialManager and TutorialManager.is_tutorial_active():
 		var current_step = TutorialManager.get_current_step()

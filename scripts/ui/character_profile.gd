@@ -48,10 +48,10 @@ var tutorial_steps = [
 		"text": "This progress section shows your quest completion count, your current streak, and total experience earned.",
 		"highlight_target": "progress_section"
 	},
-	{
-		"text": "These buttons will give you access to equipment and inventory management in future updates.",
-		"highlight_target": "action_buttons"
-	},
+	#{
+		#"text": "These buttons will give you access to equipment and inventory management in future updates.",
+		#"highlight_target": "action_buttons"
+	#},
 	{
 		"text": "Congratulations! You're now ready to embark on your epic journey of personal growth and achievement. May fortune favor your quests, brave adventurer!",
 		"highlight_target": ""
@@ -280,8 +280,8 @@ func _highlight_element(target: String):
 			target_node = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/StatsSection
 		"progress_section":
 			target_node = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ProgressSection
-		"action_buttons":
-			target_node = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ActionsSection
+		#"action_buttons":
+			#target_node = $MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ActionsSection
 	
 	if target_node:
 		_create_highlight_border(target_node)

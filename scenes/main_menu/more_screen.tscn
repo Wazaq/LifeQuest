@@ -30,15 +30,48 @@ layout_mode = 2
 text = "Settings"
 horizontal_alignment = 1
 
-[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer"]
+[node name="HeaderSpacer" type="Control" parent="MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
+
+[node name="PlayerSettings" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ResetTutorialButton" type="Button" parent="MarginContainer/VBoxContainer/PlayerSettings"]
+layout_mode = 2
+text = "Restart Tutorial"
+
+[node name="PlayerReset" type="Button" parent="MarginContainer/VBoxContainer/PlayerSettings"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Reset Game Data"
+
+[node name="ConfirmReset" type="ConfirmationDialog" parent="MarginContainer/VBoxContainer/PlayerSettings/PlayerReset"]
+title = "Delete Player Data"
+initial_position = 1
+size = Vector2i(201, 100)
+ok_button_text = "Yes"
+dialog_text = "Reset  your Game Data?"
+cancel_button_text = "Go Back"
+
+[node name="DoubleConfirmReset" type="ConfirmationDialog" parent="MarginContainer/VBoxContainer/PlayerSettings/PlayerReset"]
+auto_translate_mode = 1
+title = "Delete Player Data"
+initial_position = 1
+size = Vector2i(275, 158)
+ok_button_text = "I'm Sure"
+dialog_text = "Are you sure?
+This will delete your player,
+quest, and progress data.
+This cannot be reversed!"
+cancel_button_text = "Go Back"
 
 [node name="DebugSpacer" type="Control" parent="MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 
 [node name="DebugSection" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+visible = false
 layout_mode = 2
 
 [node name="DebugLabel" type="Label" parent="MarginContainer/VBoxContainer/DebugSection"]
@@ -61,10 +94,6 @@ text = "Jump to Quest Board Tutorial"
 [node name="CharacterProfileTutorialButton" type="Button" parent="MarginContainer/VBoxContainer/DebugSection"]
 layout_mode = 2
 text = "Jump to Character Profile Tutorial"
-
-[node name="ResetTutorialButton" type="Button" parent="MarginContainer/VBoxContainer/DebugSection"]
-layout_mode = 2
-text = "Reset Tutorial Only"
 
 [node name="AddTestQuestsButton" type="Button" parent="MarginContainer/VBoxContainer/DebugSection"]
 layout_mode = 2

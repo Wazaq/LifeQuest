@@ -199,7 +199,6 @@ theme_override_font_sizes/font_size = 80
 text = "Tap"
 
 [node name="NameInputContainer" type="Control" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -278,6 +277,8 @@ layout_mode = 2
 
 [node name="NameInput" type="LineEdit" parent="NameInputContainer/Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_colors/font_placeholder_color = Color(0.103356, 0.828735, 0.500409, 1)
+theme_override_colors/font_color = Color(0.101961, 0.827451, 0.501961, 1)
 placeholder_text = "Placeholder"
 alignment = 1
 editable = false

@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="LifeQuest"
+config/version="0.1.0-Beta"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.4", "Mobile")
 config/icon="res://icon.svg"

@@ -15,6 +15,9 @@ var is_dragging: bool = false
 
 # Action buttons
 @onready var seek_adventure_button: Button = $MainContainer/VBoxContainer/ActionSection/SeekAdventureButton
+@onready var new_quest_button: TextureButton = $MainContainer/NewQuestContainer/NewQuestButton
+@onready var avail_quest_count: Label = $MainContainer/NewQuestContainer/NewQuestButton/AvailQuestCount
+
 
 # Quest item scene for creating quest cards
 const quest_item_scene = preload("res://scenes/quests/quest_item_improved.tscn")
@@ -68,7 +71,7 @@ func _ready() -> void:
 	QuestManager.quest_completed.connect(_on_quest_completed)
 	
 	# Connect button signals
-	seek_adventure_button.pressed.connect(_on_seek_adventure_pressed)
+	new_quest_button.pressed.connect(_on_seek_adventure_pressed)
 	
 	# Load and display current quest data
 	update_quest_display()
@@ -86,7 +89,7 @@ func _on_quest_completed(quest_id, rewards):
 	#update_quest_display()
 	
 func _on_seek_adventure_pressed():
-	#print("Questboard: Seek Adventure button pressed")
+	print("Questboard: Seek Adventure button pressed")
 	
 	if not get_node_or_null("/root/QuestManager"):
 		print("QuestBoard: QuestManager not found")
@@ -194,12 +197,14 @@ func update_button_states():
 	# Update "Seek New Adventure" button
 	if get_node_or_null("/root/QuestManager"):
 		var pool_count = QuestManager.get_available_quest_count()
-		seek_adventure_button.text = "Seek New Adventure (%d available)" % pool_count
+		#seek_adventure_button.text = "Seek New Adventure (%d available)" % pool_count
+		avail_quest_count.text = "%d" % pool_count
 		
 		# Disable if we're at max active quests
-		var active_count = QuestManager.active_quests.size()
-		var max_count = QuestManager.max_active_quests
-		seek_adventure_button.disabled = (active_count >= max_count)
+		#var active_count = QuestManager.active_quests.size()
+		#var max_count = QuestManager.max_active_quests
+		#seek_adventure_button.disabled = (active_count >= max_count)
+		#new_quest_button.disabled = (active_count >= max_count)
 
 func create_quest_card(quest):
 	#print("QuestBoard: Creating quest card for: ", quest.title)
@@ -668,7 +673,7 @@ func _highlight_element(target: String):
 		"quest_list":
 			target_node = quest_list
 		"seek_adventure":
-			target_node = seek_adventure_button
+			target_node = new_quest_button
 		"quest_card":
 			# Find first active quest card
 			if quest_list.get_child_count() > 0:

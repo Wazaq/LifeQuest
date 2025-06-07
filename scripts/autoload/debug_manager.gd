@@ -73,13 +73,15 @@ func jump_to_character_profile_tutorial():
 	
 	debug_action_completed.emit("jump_to_character_profile_tutorial")
 
+# This has been moved to the player settings, but keeping it here for now
+# TODO: Possibly move out of debug manager into it's own player settings manager thing?
 func reset_tutorial_only():
 	"""Reset just tutorial completion without wiping character/quest data"""
 	print("DebugManager: Resetting tutorial state only")
 	
 	if TutorialManager:
-		TutorialManager.tutorial_active = false
-		TutorialManager.current_tutorial_step = TutorialManager.TutorialStep.NONE
+		TutorialManager.tutorial_active = true
+		TutorialManager.current_tutorial_step = TutorialManager.TutorialStep.TAVERN_HUB_TUTORIAL
 		TutorialManager.tutorial_completion_status.clear()
 	
 	# Remove tutorial data file
@@ -90,8 +92,9 @@ func reset_tutorial_only():
 			if dir:
 				dir.remove("player_tutorial_data.json")
 	
-	if UIManager:
-		UIManager.show_toast("Tutorial state reset!", "success")
+	## TODO: Possible OBE, Was moved to the player settings
+	#if UIManager:
+		#UIManager.show_toast("Tutorial has been reset!", "success")
 	
 	debug_action_completed.emit("reset_tutorial_only")
 

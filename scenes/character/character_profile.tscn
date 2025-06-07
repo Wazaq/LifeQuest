@@ -224,6 +224,7 @@ layout_mode = 2
 text = "Total Experience Earned: 3,847 XP"
 
 [node name="ActionsSection" type="VBoxContainer" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections"]
+visible = false
 layout_mode = 2
 
 [node name="ActionButtons" type="HBoxContainer" parent="MarginContainer/CharacterCard/ContentContainer/ContentPadding/ProfileSections/ActionsSection"]
